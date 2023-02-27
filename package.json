@@ -28,6 +28,7 @@
     "@nestjs/core": "^9.0.0",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/platform-fastify": "^9.3.9",
     "@nestjs/typeorm": "^9.0.1",
     "@types/hapi__joi": "^17.1.9",
     "pg": "^8.9.0",
