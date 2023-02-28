@@ -3,29 +3,27 @@ services:
   postgres:
     container_name: postgres
     image: postgres:latest
+    restart: always
     ports:
       - "5432:5432"
     volumes:
-      - ./pgdata:/var/lib/postgresql/data
+      - postgres:/data/postgres
     env_file:
       - docker.env
-    networks:
-      - postgres
 
   pgadmin:
     links:
       - postgres:postgres
     container_name: pgadmin
+    restart: always
     image: dpage/pgadmin4
     ports:
       - "8080:80"
     volumes:
-      - ./pgadmin-data:/var/lib/pgadmin
+      - pgadmin:/var/lib/pgadmin
     env_file:
       - docker.env
-    networks:
-      - postgres
 
-networks:
+volumes:
   postgres:
-    driver: bridge
+  pgadmin:

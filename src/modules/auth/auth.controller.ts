@@ -19,7 +19,7 @@ import { RequestWithUser } from 'src/modules/auth/types';
 import { UsersService } from 'src/modules/users/users.service';
 import { AuthService } from 'src/modules/auth/auth.service';
 
-@Controller('authentication')
+@Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
   constructor(
@@ -27,7 +27,7 @@ export class AuthController {
     private readonly usersService: UsersService,
   ) {}
 
-  @Post('register')
+  @Post('sign-up')
   async register(@Body() registrationData: RegisterDto) {
     return this.authenticationService.register(registrationData);
   }
