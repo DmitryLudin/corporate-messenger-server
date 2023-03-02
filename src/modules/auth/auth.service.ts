@@ -7,7 +7,7 @@ import { parse } from 'cookie';
 import { Socket } from 'socket.io';
 import { RegisterDto } from 'src/modules/auth/dto';
 import { TokenPayload } from 'src/modules/auth/types';
-import { PostgresErrorCode } from 'src/modules/database/constants';
+import { PostgresErrorCode } from 'src/modules/database/const';
 import { UsersService } from 'src/modules/users/users.service';
 
 @Injectable()
