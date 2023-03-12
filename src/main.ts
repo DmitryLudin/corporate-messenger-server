@@ -16,6 +16,7 @@ async function bootstrap() {
     new FastifyAdapter({ logger: true }),
   );
   const configService = app.get(ConfigService);
+
   app.setGlobalPrefix('api');
   await app.register(helmet);
   await app.register(fastifyCookie);

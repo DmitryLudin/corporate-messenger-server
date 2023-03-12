@@ -1,21 +1,32 @@
+import { Exclude } from 'class-transformer';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
 import { User } from 'src/modules/users/user.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 
 @Entity()
-export class Member {
+export class ChannelMember {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id: number;
 
-  @Column()
-  channelId: number;
-
-  @ManyToOne(() => Channel)
+  @ManyToOne(() => Channel, { onDelete: 'CASCADE', cascade: true })
+  @JoinColumn({ name: 'channelId' })
   channel: Channel;
 
   @Column()
-  memberId: number;
+  @Exclude()
+  channelId: string;
 
-  @ManyToOne(() => User)
-  member: User;
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @Column()
+  @Exclude()
+  userId: string;
 }
