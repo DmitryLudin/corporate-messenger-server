@@ -15,6 +15,7 @@ import {
 } from 'src/modules/auth/strategies';
 import { UsersModule } from 'src/modules/users/users.module';
 import { PassportModule } from '@nestjs/passport';
+import { AuthGateway } from './auth.gateway';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { PassportModule } from '@nestjs/passport';
     JwtAuthGuard,
     JwtRefreshTokenStrategy,
     JwtRefreshGuard,
+    AuthGateway,
   ],
   controllers: [AuthController],
   exports: [AuthService],

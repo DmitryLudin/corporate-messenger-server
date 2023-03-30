@@ -14,12 +14,12 @@ export class ChannelsMembershipGateway {
 
   @SubscribeMessage('createChannelsMember')
   create(@MessageBody() createChannelsMemberDto: AddChannelMemberDto) {
-    return this.channelsMembershipService.create(createChannelsMemberDto);
+    // return this.channelsMembershipService.create(createChannelsMemberDto);
   }
 
   @SubscribeMessage('findAllChannelsMembers')
   findAll(@MessageBody() id: string) {
-    return this.channelsMembershipService.findAll(id);
+    // return this.channelsMembershipService.findAll(id);
   }
 
   @SubscribeMessage('removeChannelsMember')

@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsArray, IsOptional, IsString } from 'class-validator';
 
 export class CreateChannelDto {
   @IsString()
@@ -14,4 +14,8 @@ export class CreateChannelDto {
   @IsString()
   @IsOptional()
   displayName?: string;
+
+  @IsArray()
+  @IsOptional()
+  members?: string[];
 }

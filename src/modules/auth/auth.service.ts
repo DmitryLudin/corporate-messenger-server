@@ -56,7 +56,7 @@ export class AuthService {
     }
   }
 
-  getCookieWithJwtAccessToken(userId: number) {
+  getCookieWithJwtAccessToken(userId: string) {
     const payload: TokenPayload = { userId };
     const token = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
@@ -69,7 +69,7 @@ export class AuthService {
     )}`;
   }
 
-  getCookieWithJwtRefreshToken(userId: number) {
+  getCookieWithJwtRefreshToken(userId: string) {
     const payload: TokenPayload = { userId };
     const token = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),

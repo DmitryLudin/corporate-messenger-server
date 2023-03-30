@@ -12,7 +12,7 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async getById(id: number) {
+  async getById(id: string) {
     const user = await this.usersRepository.findOne({ where: { id } });
 
     if (!user) {
@@ -38,7 +38,7 @@ export class UsersService {
     return user;
   }
 
-  async getUserIfRefreshTokenMatches(refreshToken: string, userId: number) {
+  async getUserIfRefreshTokenMatches(refreshToken: string, userId: string) {
     const user = await this.getById(userId);
 
     const isRefreshTokenMatching = await bcrypt.compare(
@@ -58,13 +58,13 @@ export class UsersService {
     return newUser;
   }
 
-  async removeRefreshToken(userId: number) {
+  async removeRefreshToken(userId: string) {
     return this.usersRepository.update(userId, {
       currentHashedRefreshToken: null,
     });
   }
 
-  async setCurrentRefreshToken(refreshToken: string, userId: number) {
+  async setCurrentRefreshToken(refreshToken: string, userId: string) {
     const currentHashedRefreshToken = await bcrypt.hash(refreshToken, 10);
     await this.usersRepository.update(userId, {
       currentHashedRefreshToken,

@@ -5,6 +5,8 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
+import fastifyCors from '@fastify/cors';
+import { cors } from 'src/const/cors';
 import { AppModule } from 'src/modules/app.module';
 import helmet from '@fastify/helmet';
 import fastifyCookie from '@fastify/cookie';
@@ -19,6 +21,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
   await app.register(helmet);
+  await app.register(fastifyCors, cors);
   await app.register(fastifyCookie);
   await app.register(fastifyCsrf);
   app.useGlobalPipes(

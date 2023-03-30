@@ -12,6 +12,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/modules/auth/guards';
+import { ChannelsGateway } from 'src/modules/channels/channels.gateway';
 import { ChannelsService } from 'src/modules/channels/channels.service';
 import { CreateChannelDto } from 'src/modules/channels/dto/create-channel.dto';
 import { UpdateChannelDto } from 'src/modules/channels/dto/update-channel.dto';
@@ -19,7 +20,10 @@ import { UpdateChannelDto } from 'src/modules/channels/dto/update-channel.dto';
 @Controller('channels')
 @UseInterceptors(ClassSerializerInterceptor)
 export class ChannelsController {
-  constructor(private readonly channelsService: ChannelsService) {}
+  constructor(
+    private readonly channelsService: ChannelsService,
+    private readonly channelsGateway: ChannelsGateway,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get()
@@ -31,7 +35,9 @@ export class ChannelsController {
   @UseGuards(JwtAuthGuard)
   @Post('create')
   async create(@Body() data: CreateChannelDto) {
-    return this.channelsService.create(data);
+    const channel = await this.channelsService.create(data);
+    this.channelsGateway.emitNewChannelToUsers(channel, data.members);
+    return channel;
   }
 
   @UseGuards(JwtAuthGuard)
@@ -52,11 +58,5 @@ export class ChannelsController {
   @Patch(':id')
   async update(@Param('id') id: string, @Body() data: UpdateChannelDto) {
     return this.channelsService.update(id, data);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get(':id/membership')
-  async getMembers(@Param('id') channelId: string) {
-    return this.channelsService.findOne(channelId);
   }
 }
