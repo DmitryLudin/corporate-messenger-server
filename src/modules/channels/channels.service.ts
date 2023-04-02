@@ -1,18 +1,17 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateChannelDto } from 'src/modules/channels/dto/create-channel.dto';
 import { UpdateChannelDto } from 'src/modules/channels/dto/update-channel.dto';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
-import { ChannelsMembershipService } from 'src/modules/channels/modules/membership/membership.service';
-import { DataSource, Repository } from 'typeorm';
+import { CreateChannelTransaction } from 'src/modules/channels/transactions/create-channel.transaction';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ChannelsService {
   constructor(
     @InjectRepository(Channel)
     private channelsRepository: Repository<Channel>,
-    private readonly channelsMembershipService: ChannelsMembershipService,
-    private readonly dataSource: DataSource,
+    private readonly createChannelTransaction: CreateChannelTransaction,
   ) {}
 
   async findAll(): Promise<Channel[]> {
@@ -23,40 +22,9 @@ export class ChannelsService {
     return this.channelsRepository.findOne({ where: { id } });
   }
 
-  async create({
-    userId,
-    members,
-    ...others
-  }: CreateChannelDto): Promise<Channel> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      const channel = queryRunner.manager.create<Channel>(Channel, others);
-      let userIds = [userId];
-
-      if (members && members.length > 0) {
-        userIds = userIds.concat(members);
-      }
-
-      await Promise.all([
-        this.channelsMembershipService.createMultipleWithTransaction(
-          { channelId: channel.id, userIds },
-          queryRunner,
-        ),
-        queryRunner.manager.insert(Channel, channel),
-      ]);
-
-      await queryRunner.commitTransaction();
-
-      return this.findOne(channel.id);
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw new InternalServerErrorException();
-    } finally {
-      await queryRunner.release();
-    }
+  async create(data: CreateChannelDto): Promise<Channel> {
+    const channel = await this.createChannelTransaction.run(data);
+    return this.findOne(channel.id);
   }
 
   async update(channelId: string, data: UpdateChannelDto): Promise<Channel> {

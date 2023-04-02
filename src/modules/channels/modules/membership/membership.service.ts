@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChannelMember } from 'src/modules/channels/entities/member.entity';
 import { AddChannelMembersDto } from 'src/modules/channels/modules/membership/dto/add-channel-members.dto';
-import { QueryRunner, Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 
 @Injectable()
 export class ChannelsMembershipService {
@@ -20,16 +20,16 @@ export class ChannelsMembershipService {
 
   async createMultipleWithTransaction(
     { channelId, userIds }: AddChannelMembersDto,
-    queryRunner: QueryRunner,
+    manager: EntityManager,
   ) {
     const members = userIds.map((userId: string) =>
-      queryRunner.manager.create<ChannelMember>(ChannelMember, {
+      manager.create<ChannelMember>(ChannelMember, {
         channelId,
         userId,
       }),
     );
 
-    return await queryRunner.manager.insert(ChannelMember, members);
+    return await manager.insert(ChannelMember, members);
   }
 
   async findAllUserChannels(userId: string) {

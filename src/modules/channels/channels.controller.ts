@@ -36,7 +36,10 @@ export class ChannelsController {
   @Post('create')
   async create(@Body() data: CreateChannelDto) {
     const channel = await this.channelsService.create(data);
-    this.channelsGateway.emitNewChannelToUsers(channel, data.members);
+    this.channelsGateway.emitNewChannelToUsers({
+      channel,
+      userIds: data.members,
+    });
     return channel;
   }
 
