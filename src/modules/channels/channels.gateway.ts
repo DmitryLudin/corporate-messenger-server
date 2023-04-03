@@ -1,20 +1,50 @@
-import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import {
+  OnGatewayConnection,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
 import { instanceToPlain } from 'class-transformer';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { cors } from 'src/const/cors';
+import { AuthService } from 'src/modules/auth/auth.service';
 import { ChannelsEventEnum } from 'src/modules/channels/const/channels-event.enum';
-import { NewChannelDto } from 'src/modules/channels/dto/new-channel.dto';
+import { Channel } from 'src/modules/channels/entities/channel.entity';
+import { ChannelsMembershipService } from 'src/modules/channels/modules/membership/membership.service';
 
 @WebSocketGateway({ cors, namespace: 'channels' })
-export class ChannelsGateway {
+export class ChannelsGateway implements OnGatewayConnection {
   @WebSocketServer()
-  server: Server;
+  private readonly server: Server;
 
-  emitNewChannelToUsers({ userIds, channel }: NewChannelDto) {
+  constructor(
+    private readonly channelsMembershipService: ChannelsMembershipService,
+    private readonly authService: AuthService,
+  ) {}
+
+  async handleConnection(client: Socket) {
+    const user = await this.authService.getUserFromSocket(client);
+    const channels = await this.channelsMembershipService.findAllUserChannels(
+      user.id,
+    );
+    channels.forEach((channel) => client.join(channel.id));
+  }
+
+  emitNewChannel(userIds: string[], channel: Channel) {
     this.server.to(userIds).emit(ChannelsEventEnum.NEW_CHANNEL, {
       channel: this.deserializeData(channel),
-      userIds,
     });
+  }
+
+  emitUpdatedChannel(channel: Channel) {
+    this.server.to(channel.id).emit(ChannelsEventEnum.CHANNEL_UPDATED, {
+      channel: this.deserializeData(channel),
+    });
+  }
+
+  emitRemovedChannel(channelId: string) {
+    this.server
+      .to(channelId)
+      .emit(ChannelsEventEnum.CHANNEL_REMOVED, { channelId });
   }
 
   private deserializeData<T extends object>(data: T): T {

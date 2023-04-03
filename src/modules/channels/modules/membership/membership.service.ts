@@ -33,21 +33,23 @@ export class ChannelsMembershipService {
   }
 
   async findAllUserChannels(userId: string) {
-    const channelMemberships = await this.channelMembersRepository.find({
+    const channelsMembership = await this.channelMembersRepository.find({
       where: { userId },
       relations: ['channel'],
       select: ['channel'],
     });
-    return channelMemberships.map((membership) => membership.channel);
+
+    return channelsMembership.map((membership) => membership.channel);
   }
 
   async findAllChannelMembers(channelId: string) {
-    const channelMemberships = await this.channelMembersRepository.find({
+    const channelsMembership = await this.channelMembersRepository.find({
       where: { channelId },
       relations: ['user'],
       select: ['user'],
     });
-    return channelMemberships.map((membership) => membership.user);
+
+    return channelsMembership.map((membership) => membership.user);
   }
 
   async remove(userId: string) {

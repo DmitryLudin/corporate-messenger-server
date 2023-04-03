@@ -6,7 +6,7 @@ import { ChannelsMembershipService } from 'src/modules/channels/modules/membersh
 import { DataSource, EntityManager } from 'typeorm';
 
 @Injectable()
-export class CreateChannelTransaction extends BaseTransaction<
+export class ChannelCreationTransaction extends BaseTransaction<
   CreateChannelDto,
   Channel
 > {
@@ -24,7 +24,7 @@ export class CreateChannelTransaction extends BaseTransaction<
     const channel = manager.create<Channel>(Channel, others);
     let userIds = [userId];
 
-    if (members && members.length > 0) {
+    if (members?.length > 0) {
       userIds = userIds.concat(members);
     }
 

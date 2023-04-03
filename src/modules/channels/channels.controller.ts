@@ -36,10 +36,7 @@ export class ChannelsController {
   @Post('create')
   async create(@Body() data: CreateChannelDto) {
     const channel = await this.channelsService.create(data);
-    this.channelsGateway.emitNewChannelToUsers({
-      channel,
-      userIds: data.members,
-    });
+    this.channelsGateway.emitNewChannel(data.members, channel);
     return channel;
   }
 
@@ -51,15 +48,18 @@ export class ChannelsController {
 
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return this.channelsService.remove(id);
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() data: UpdateChannelDto) {
+    const channel = await this.channelsService.update(id, data);
+    this.channelsGateway.emitUpdatedChannel(channel);
+    return channel;
   }
 
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() data: UpdateChannelDto) {
-    return this.channelsService.update(id, data);
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    await this.channelsService.remove(id);
+    this.channelsGateway.emitRemovedChannel(id);
   }
 }

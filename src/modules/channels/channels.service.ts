@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateChannelDto } from 'src/modules/channels/dto/create-channel.dto';
 import { UpdateChannelDto } from 'src/modules/channels/dto/update-channel.dto';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
-import { CreateChannelTransaction } from 'src/modules/channels/transactions/create-channel.transaction';
+import { ChannelCreationTransaction } from 'src/modules/channels/transactions/create-channel.transaction';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class ChannelsService {
   constructor(
     @InjectRepository(Channel)
     private channelsRepository: Repository<Channel>,
-    private readonly createChannelTransaction: CreateChannelTransaction,
+    private readonly createChannelTransaction: ChannelCreationTransaction,
   ) {}
 
   async findAll(): Promise<Channel[]> {
