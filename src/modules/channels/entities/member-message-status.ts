@@ -1,6 +1,6 @@
 import { Exclude } from 'class-transformer';
-import { ChannelMember } from 'src/modules/channels/entities/member.entity';
-import { ChannelMessage } from 'src/modules/channels/entities/message.entity';
+import { Channel } from 'src/modules/channels/entities/channel.entity';
+import { User } from 'src/modules/users/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -10,26 +10,26 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class ChannelMemberMessageStatus {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class UserChannelStatus {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column({ default: true })
-  isRead: boolean;
+  @Column({ default: false })
+  isUnread: boolean;
 
-  @ManyToOne(() => ChannelMember)
-  @JoinColumn({ name: 'memberId' })
-  member: ChannelMember;
-
-  @Column()
-  @Exclude()
-  memberId: string;
-
-  @ManyToOne(() => ChannelMessage)
-  @JoinColumn({ name: 'messageId' })
-  message: ChannelMessage;
+  @ManyToOne(() => Channel, { onDelete: 'CASCADE', cascade: true })
+  @JoinColumn({ name: 'channelId' })
+  channel: Channel;
 
   @Column()
   @Exclude()
-  messageId: string;
+  channelId: string;
+
+  @ManyToOne(() => User, { onDelete: 'CASCADE', eager: true })
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @Column()
+  @Exclude()
+  userId: string;
 }

@@ -22,7 +22,7 @@ export class ChannelMember {
   @Exclude()
   channelId: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, { onDelete: 'CASCADE', eager: true })
   @JoinColumn({ name: 'userId' })
   user: User;
 

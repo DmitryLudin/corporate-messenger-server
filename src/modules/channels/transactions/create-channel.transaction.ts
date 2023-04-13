@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BaseTransaction } from 'src/core/base-transaction';
 import { CreateChannelDto } from 'src/modules/channels/dto/create-channel.dto';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
-import { ChannelsMembershipService } from 'src/modules/channels/modules/membership/membership.service';
+import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
 import { DataSource, EntityManager } from 'typeorm';
 
 @Injectable()
@@ -29,8 +29,9 @@ export class ChannelCreationTransaction extends BaseTransaction<
     }
 
     await Promise.all([
-      this.channelsMembershipService.createMultipleWithTransaction(
-        { channelId: channel.id, userIds },
+      this.channelsMembershipService.createMultiple(
+        channel.id,
+        { userIds },
         manager,
       ),
       manager.insert(Channel, channel),

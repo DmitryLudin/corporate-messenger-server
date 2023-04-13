@@ -20,14 +20,14 @@ export class ChannelMessage {
   text: string;
 
   @ManyToOne(() => User, { eager: true })
-  @JoinColumn({ name: 'authorId' })
-  author: User;
+  @JoinColumn({ name: 'userId' })
+  user: User;
 
   @Column()
   @Exclude()
-  authorId: string;
+  userId: string;
 
-  @ManyToOne(() => Channel, { eager: true })
+  @ManyToOne(() => Channel)
   @JoinColumn({ name: 'channelId' })
   channel: Channel;
 
@@ -35,9 +35,13 @@ export class ChannelMessage {
   @Exclude()
   channelId: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  get timestamp() {
+    return this.createdAt.getTime() / 1000;
+  }
 }

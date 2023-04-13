@@ -5,6 +5,7 @@ import { AuthModule } from 'src/modules/auth/auth.module';
 import { ChannelsModule } from 'src/modules/channels/channels.module';
 import { DatabaseModule } from 'src/modules/database/database.module';
 import { UsersModule } from 'src/modules/users/users.module';
+import { GlobalCacheModule } from './global-cache/global-cache.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { UsersModule } from 'src/modules/users/users.module';
     DatabaseModule,
     UsersModule,
     ChannelsModule,
+    GlobalCacheModule,
   ],
 })
 export class AppModule {}
