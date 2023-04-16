@@ -1,6 +1,7 @@
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
+import { UnreadChannelTimestampDto } from 'src/modules/channels/dto/unread-timestamp.dto';
 import { UserChannelStatus } from 'src/modules/channels/entities/user-channel-status';
 import { ChannelMember } from 'src/modules/channels/entities/member.entity';
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
@@ -27,14 +28,20 @@ export class UnreadChannelsService {
     }
   }
 
-  async markAsRead(userId: string, channelId: string): Promise<void> {
+  async markAsRead({
+    userId,
+    channelId,
+    timestamp,
+  }: UnreadChannelTimestampDto): Promise<void> {
     // Сохраняем время последнего прочитанного сообщения
     const lastReadKey = `channelLastRead:${userId}:${channelId}`;
     const lastMessage = await this.messagesService.findLastMessage(channelId);
-    await this.cacheManager.set(lastReadKey, lastMessage.timestamp);
+    await this.cacheManager.set(lastReadKey, timestamp);
 
-    // Удаляем метку непрочитанного канала
-    await this.cacheManager.del(`channelUnread:${userId}:${channelId}`);
+    if (lastMessage.timestamp === timestamp) {
+      // Удаляем метку непрочитанного канала
+      await this.cacheManager.del(`channelUnread:${userId}:${channelId}`);
+    }
   }
 
   async isUnread(userId: string, channelId: string): Promise<boolean> {

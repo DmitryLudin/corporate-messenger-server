@@ -19,6 +19,7 @@ import { UnreadChannelTimestampDto } from 'src/modules/channels/dto/unread-times
 import { Channel } from 'src/modules/channels/entities/channel.entity';
 import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
+import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
 import { UsersService } from 'src/modules/users/users.service';
 
 @WebSocketGateway({ cors, namespace: 'channels' })
@@ -29,7 +30,7 @@ export class ChannelsGateway implements OnGatewayConnection {
   constructor(
     private readonly channelsMembershipService: ChannelsMembershipService,
     private readonly channelMessagesService: ChannelMessagesService,
-    private readonly channelsUnreadService,
+    private readonly unreadChannelsService: UnreadChannelsService,
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
   ) {}
@@ -92,7 +93,7 @@ export class ChannelsGateway implements OnGatewayConnection {
     );
 
     members.forEach((user) => {
-      this.channelsUnreadService.markAsUnread(user.id, data.channelId);
+      this.unreadChannelsService.markAsUnread(user.id, data.channelId);
       client.to(user.id).emit(ChannelsEventEnum.UNREAD_CHANNEL, {
         channelId: data.channelId,
       });
@@ -103,9 +104,8 @@ export class ChannelsGateway implements OnGatewayConnection {
   @SubscribeMessage(ChannelsEventEnum.UNREAD_CHANNEL_TIMESTAMP)
   async handleUpdateChannelTimestampEvent(
     @MessageBody() data: UnreadChannelTimestampDto,
-    @ConnectedSocket() client: Socket,
   ) {
-    console.log('');
+    this.unreadChannelsService.markAsRead(data);
   }
 
   private deserializeData<T extends object>(data: T): T {
