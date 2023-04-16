@@ -6,6 +6,7 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsResponse,
 } from '@nestjs/websockets';
 import { instanceToPlain } from 'class-transformer';
 import { Server, Socket } from 'socket.io';
@@ -15,8 +16,11 @@ import { ChannelsEventEnum } from 'src/modules/channels/const/channels-event.enu
 import { AddChannelMembersDto } from 'src/modules/channels/dto/add-channel-members.dto';
 import { CreateChannelMessageDto } from 'src/modules/channels/dto/create-message.dto';
 import { RemoveChannelMemberDto } from 'src/modules/channels/dto/remove-channel-member.dto';
+import { RemoveChannelMessageDto } from 'src/modules/channels/dto/remove-message.dto';
 import { UnreadChannelTimestampDto } from 'src/modules/channels/dto/unread-timestamp.dto';
+import { UpdateChannelMessageDto } from 'src/modules/channels/dto/update-message.dto';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
+import { ChannelMessage } from 'src/modules/channels/entities/message.entity';
 import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
 import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
@@ -102,11 +106,42 @@ export class ChannelsGateway implements OnGatewayConnection {
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
+  @SubscribeMessage(ChannelsEventEnum.MESSAGE_UPDATED)
+  async handleUpdateMessage(
+    @MessageBody() data: UpdateChannelMessageDto,
+    @ConnectedSocket() client: Socket,
+  ): Promise<WsResponse<ChannelMessage>> {
+    const message = await this.channelMessagesService.update(data);
+
+    client
+      .to(message.channelId)
+      .emit(ChannelsEventEnum.MESSAGE_UPDATED, this.deserializeData(message));
+    return {
+      event: ChannelsEventEnum.MESSAGE_UPDATED,
+      data: message,
+    };
+  }
+
+  @UseInterceptors(ClassSerializerInterceptor)
+  @SubscribeMessage(ChannelsEventEnum.MESSAGE_REMOVED)
+  async handleRemoveMessage(
+    @MessageBody() data: RemoveChannelMessageDto,
+    @ConnectedSocket() client: Socket,
+  ) {
+    await this.channelMessagesService.remove(data);
+
+    client.to(data.channelId).emit(ChannelsEventEnum.MESSAGE_REMOVED);
+    return {
+      event: ChannelsEventEnum.MESSAGE_REMOVED,
+    };
+  }
+
+  @UseInterceptors(ClassSerializerInterceptor)
   @SubscribeMessage(ChannelsEventEnum.UNREAD_CHANNEL_TIMESTAMP)
   async handleUpdateChannelTimestampEvent(
     @MessageBody() data: UnreadChannelTimestampDto,
   ) {
-    this.unreadChannelsService.markAsRead(data);
+    return this.unreadChannelsService.markAsRead(data);
   }
 
   private deserializeData<T extends object>(data: T): T {

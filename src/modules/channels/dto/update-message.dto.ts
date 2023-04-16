@@ -1,8 +1,10 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateChannelMessageDto } from './create-message.dto';
+import { IsString, MaxLength } from 'class-validator';
 
-export class UpdateChannelMessageDto extends PartialType(
-  CreateChannelMessageDto,
-) {
-  id: number;
+export class UpdateChannelMessageDto {
+  @IsString()
+  id: string;
+
+  @IsString()
+  @MaxLength(5000)
+  text: string;
 }
