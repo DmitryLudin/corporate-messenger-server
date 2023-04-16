@@ -88,11 +88,12 @@ export class ChannelsGateway implements OnGatewayConnection {
 
     client.to(data.channelId).emit(ChannelsEventEnum.CHANNEL_MESSAGE, message);
 
-    const members = await this.channelsMembershipService.findAllChannelMembers(
-      data.channelId,
-    );
+    const memberships =
+      await this.channelsMembershipService.findAllChannelMembership(
+        data.channelId,
+      );
 
-    members.forEach((user) => {
+    memberships.forEach(({ user }) => {
       this.unreadChannelsService.markAsUnread(user.id, data.channelId);
       client.to(user.id).emit(ChannelsEventEnum.UNREAD_CHANNEL, {
         channelId: data.channelId,

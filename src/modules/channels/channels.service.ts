@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
 import { CreateChannelDto } from 'src/modules/channels/dto/create-channel.dto';
 import { UpdateChannelDto } from 'src/modules/channels/dto/update-channel.dto';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
@@ -16,8 +17,8 @@ export class ChannelsService {
     private readonly unreadChannelsService: UnreadChannelsService,
   ) {}
 
-  async findAll(): Promise<Channel[]> {
-    return this.channelsRepository.find();
+  async findAll(options: IPaginationOptions) {
+    return paginate(this.channelsRepository, options);
   }
 
   async findOne(id: string): Promise<Channel> {

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
 import { CreateChannelMessageDto } from 'src/modules/channels/dto/create-message.dto';
 import { UpdateChannelMessageDto } from 'src/modules/channels/dto/update-message.dto';
 import { ChannelMessage } from 'src/modules/channels/entities/message.entity';
@@ -18,8 +19,8 @@ export class ChannelMessagesService {
     return this.findOne(message.id);
   }
 
-  findAll(channelId: string) {
-    return this.messagesRepository.find({ where: { channelId } });
+  findAll(channelId: string, options: IPaginationOptions) {
+    return paginate(this.messagesRepository, options, { where: { channelId } });
   }
 
   findOne(id: string) {

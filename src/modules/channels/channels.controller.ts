@@ -8,9 +8,11 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { IPaginationOptions } from 'nestjs-typeorm-paginate';
 import { JwtAuthGuard } from 'src/modules/auth/guards';
 import { ChannelsGateway } from 'src/modules/channels/channels.gateway';
 import { ChannelsService } from 'src/modules/channels/channels.service';
@@ -19,6 +21,7 @@ import { CreateChannelDto } from 'src/modules/channels/dto/create-channel.dto';
 import { RemoveChannelMemberDto } from 'src/modules/channels/dto/remove-channel-member.dto';
 import { UpdateChannelDto } from 'src/modules/channels/dto/update-channel.dto';
 import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
+import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
 
 @Controller('channels')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -26,14 +29,14 @@ export class ChannelsController {
   constructor(
     private readonly channelsService: ChannelsService,
     private readonly channelsMembershipService: ChannelsMembershipService,
+    private readonly channelMessagesService: ChannelMessagesService,
     private readonly channelsGateway: ChannelsGateway,
   ) {}
 
-  // TODO: добавить пагинацию
   @UseGuards(JwtAuthGuard)
   @Get()
-  async getAll() {
-    return this.channelsService.findAll();
+  async getAll(@Query() options: IPaginationOptions) {
+    return this.channelsService.findAll(options);
   }
 
   @HttpCode(200)
@@ -80,11 +83,16 @@ export class ChannelsController {
     this.channelsGateway.emitRemovedChannel(id);
   }
 
-  // TODO: добавить пагинацию
   @UseGuards(JwtAuthGuard)
   @Get(':id/members')
-  async getChannelMembers(@Param('id') channelId: string) {
-    return this.channelsMembershipService.findAllChannelMembers(channelId);
+  async getChannelMembers(
+    @Param('id') channelId: string,
+    @Query() options: IPaginationOptions,
+  ) {
+    return this.channelsMembershipService.findAllChannelMembers(
+      channelId,
+      options,
+    );
   }
 
   @HttpCode(200)
@@ -109,5 +117,12 @@ export class ChannelsController {
     return this.channelsGateway.emitRemovedChannelMember(channelId, data);
   }
 
-  //TODO: сделать получение сообщений с пагинацией
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/messages')
+  async getChannelMessages(
+    @Param('id') channelId: string,
+    @Query() options: IPaginationOptions,
+  ) {
+    return this.channelMessagesService.findAll(channelId, options);
+  }
 }

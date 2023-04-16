@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
 import { AddChannelMembersDto } from 'src/modules/channels/dto/add-channel-members.dto';
 import { ChannelMember } from 'src/modules/channels/entities/member.entity';
 import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
@@ -43,14 +44,29 @@ export class ChannelsMembershipService {
     }));
   }
 
-  async findAllChannelMembers(channelId: string) {
-    const channelsMembership = await this.channelMembersRepository.find({
+  async findAllChannelMembership(channelId: string) {
+    return await this.channelMembersRepository.find({
       where: { channelId },
       relations: ['user'],
       select: ['user'],
     });
+  }
 
-    return channelsMembership.map((membership) => membership.user);
+  async findAllChannelMembers(channelId: string, options: IPaginationOptions) {
+    const channelsMembership = await paginate(
+      this.channelMembersRepository,
+      options,
+      {
+        where: { channelId },
+        relations: ['user'],
+        select: ['user'],
+      },
+    );
+
+    return {
+      ...channelsMembership,
+      items: channelsMembership.items.map((membership) => membership.user),
+    };
   }
 
   async remove(channelId: string, userId: string) {
