@@ -17,6 +17,9 @@ export class UserChannelStatus {
   @Column({ default: false })
   isUnread: boolean;
 
+  @Column({ nullable: true })
+  lastRead?: number;
+
   @ManyToOne(() => Channel, { onDelete: 'CASCADE', cascade: true })
   @JoinColumn({ name: 'channelId' })
   channel: Channel;

@@ -52,9 +52,15 @@ export class ChannelsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':id')
-  async getById(@Param('id') channelId: string) {
-    return this.channelsService.findOne(channelId);
+  @Get(':channelId/:userId')
+  async getById(
+    @Param('channelId') channelId: string,
+    @Param('userId') userId: string,
+  ) {
+    return this.channelsService.getChannelWithLastReadTimestamp(
+      channelId,
+      userId,
+    );
   }
 
   @HttpCode(200)
@@ -102,4 +108,6 @@ export class ChannelsController {
     await this.channelsMembershipService.remove(channelId, data.userId);
     return this.channelsGateway.emitRemovedChannelMember(channelId, data);
   }
+
+  //TODO: сделать получение сообщений с пагинацией
 }

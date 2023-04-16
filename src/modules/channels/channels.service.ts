@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateChannelDto } from 'src/modules/channels/dto/create-channel.dto';
 import { UpdateChannelDto } from 'src/modules/channels/dto/update-channel.dto';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
+import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
 import { ChannelCreationTransaction } from 'src/modules/channels/transactions/create-channel.transaction';
 import { Repository } from 'typeorm';
 
@@ -12,6 +13,7 @@ export class ChannelsService {
     @InjectRepository(Channel)
     private channelsRepository: Repository<Channel>,
     private readonly createChannelTransaction: ChannelCreationTransaction,
+    private readonly unreadChannelsService: UnreadChannelsService,
   ) {}
 
   async findAll(): Promise<Channel[]> {
@@ -20,6 +22,21 @@ export class ChannelsService {
 
   async findOne(id: string): Promise<Channel> {
     return this.channelsRepository.findOne({ where: { id } });
+  }
+
+  async getChannelWithLastReadTimestamp(channelId: string, userId: string) {
+    const channel = await this.channelsRepository.findOne({
+      where: { id: channelId },
+    });
+    const lastRead = await this.unreadChannelsService.getLastRead(
+      userId,
+      channelId,
+    );
+
+    return {
+      ...channel,
+      lastRead,
+    };
   }
 
   async create(data: CreateChannelDto): Promise<Channel> {

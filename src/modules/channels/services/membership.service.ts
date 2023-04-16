@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AddChannelMembersDto } from 'src/modules/channels/dto/add-channel-members.dto';
 import { ChannelMember } from 'src/modules/channels/entities/member.entity';
-import { ChannelsUnreadService } from 'src/modules/channels/services/unread.service';
+import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
 import { EntityManager, Repository } from 'typeorm';
 
 @Injectable()
@@ -10,7 +10,7 @@ export class ChannelsMembershipService {
   constructor(
     @InjectRepository(ChannelMember)
     private channelMembersRepository: Repository<ChannelMember>,
-    private readonly channelsUnreadService: ChannelsUnreadService,
+    private readonly unreadChannelsService: UnreadChannelsService,
   ) {}
 
   async createMultiple(
@@ -36,7 +36,7 @@ export class ChannelsMembershipService {
 
     return channelsMembership.map((membership) => ({
       ...membership.channel,
-      isUnread: this.channelsUnreadService.isUnread(
+      isUnread: this.unreadChannelsService.isUnread(
         userId,
         membership.channelId,
       ),

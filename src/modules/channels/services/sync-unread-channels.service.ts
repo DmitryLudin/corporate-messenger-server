@@ -2,7 +2,7 @@ import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
-import { UserChannelStatus } from 'src/modules/channels/entities/member-message-status';
+import { UserChannelStatus } from 'src/modules/channels/entities/user-channel-status';
 import { ChannelMember } from 'src/modules/channels/entities/member.entity';
 import { Repository } from 'typeorm';
 
@@ -29,6 +29,9 @@ export class SyncUnreadChannelsService {
       const userId = keys[i].split(':')[1];
       const channelId = keys[i].split(':')[2];
       const isUnreadChannelCache = results[i] === 1;
+      const lastRead = await redisClient.get<number | undefined>(
+        `channelLastRead:${userId}:${channelId}`,
+      );
       const userChannelStatus = await this.userChannelStatusRepository.findOne({
         where: { userId, channelId },
       });
@@ -39,15 +42,18 @@ export class SyncUnreadChannelsService {
             userId,
             channelId,
             isUnread: isUnreadChannelCache,
+            lastRead,
           }),
         );
       } else if (!isUnreadChannelCache && userChannelStatus) {
         await Promise.all([
           this.userChannelStatusRepository.remove(userChannelStatus),
           this.cacheManager.del(`channelUnread:${userId}:${channelId}`),
+          this.cacheManager.del(`channelLastRead:${userId}:${channelId}`),
         ]);
       } else if (isUnreadChannelCache && userChannelStatus) {
         userChannelStatus.isUnread = isUnreadChannelCache;
+        userChannelStatus.lastRead = lastRead;
         allChannelsStatuses.push(userChannelStatus);
       }
     }

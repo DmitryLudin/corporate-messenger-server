@@ -1,13 +1,13 @@
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
-import { UserChannelStatus } from 'src/modules/channels/entities/member-message-status';
+import { UserChannelStatus } from 'src/modules/channels/entities/user-channel-status';
 import { ChannelMember } from 'src/modules/channels/entities/member.entity';
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class ChannelsUnreadService {
+export class UnreadChannelsService {
   constructor(
     @Inject(CACHE_MANAGER)
     private cacheManager: Cache,
@@ -23,11 +23,7 @@ export class ChannelsUnreadService {
 
     if (!lastReadTimestamp || lastMessage.timestamp > lastReadTimestamp) {
       // Помечаем канал как непрочитанный
-      await this.cacheManager.set(
-        `channelUnread:${userId}:${channelId}`,
-        1,
-        3600000,
-      );
+      await this.cacheManager.set(`channelUnread:${userId}:${channelId}`, 1);
     }
   }
 
@@ -55,5 +51,22 @@ export class ChannelsUnreadService {
     }
 
     return isUnread === 1;
+  }
+
+  async getLastRead(userId: string, channelId: string) {
+    const lastReadKey = `channelLastRead:${userId}:${channelId}`;
+    const lastReadTimestamp = await this.cacheManager.get<number | undefined>(
+      lastReadKey,
+    );
+
+    if (lastReadTimestamp) {
+      return lastReadTimestamp;
+    }
+
+    const userChannelStatus = await this.userChannelStatusRepository.findOne({
+      where: { userId, channelId },
+    });
+
+    return userChannelStatus.lastRead;
   }
 }
