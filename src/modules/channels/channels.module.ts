@@ -32,5 +32,6 @@ import { UnreadChannelsService } from 'src/modules/channels/services/unread-chan
     ChannelsGateway,
   ],
   controllers: [ChannelsController],
+  exports: [ChannelsService, ChannelCreationTransaction],
 })
 export class ChannelsModule {}
