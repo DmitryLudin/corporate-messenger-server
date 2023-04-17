@@ -6,6 +6,7 @@ import { ChannelsModule } from 'src/modules/channels/channels.module';
 import { DatabaseModule } from 'src/modules/database/database.module';
 import { UsersModule } from 'src/modules/users/users.module';
 import { GlobalCacheModule } from './global-cache/global-cache.module';
+import { NamespacesModule } from './namespaces/namespaces.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { GlobalCacheModule } from './global-cache/global-cache.module';
     UsersModule,
     ChannelsModule,
     GlobalCacheModule,
+    NamespacesModule,
   ],
 })
 export class AppModule {}

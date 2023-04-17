@@ -8,7 +8,9 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
   Get,
+  Res,
 } from '@nestjs/common';
+import { FastifyReply } from 'fastify';
 import { RegisterDto } from 'src/modules/auth/dto';
 import {
   JwtAuthGuard,
@@ -35,8 +37,8 @@ export class AuthController {
   @HttpCode(200)
   @UseGuards(LocalAuthGuard)
   @Post('log-in')
-  async logIn(@Req() request: RequestWithUser) {
-    const { user, res } = request;
+  async logIn(@Req() request: RequestWithUser, @Res() response: FastifyReply) {
+    const { user } = request;
     const accessTokenCookie =
       this.authenticationService.getCookieWithJwtAccessToken(user.id);
     const { cookie: refreshTokenCookie, token: refreshToken } =
@@ -44,7 +46,7 @@ export class AuthController {
 
     await this.usersService.setCurrentRefreshToken(refreshToken, user.id);
 
-    res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
+    response.header('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
 
     return user;
   }
@@ -52,9 +54,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('log-out')
   @HttpCode(200)
-  async logOut(@Req() request: RequestWithUser) {
+  async logOut(@Req() request: RequestWithUser, @Res() response: FastifyReply) {
     await this.usersService.removeRefreshToken(request.user.id);
-    request.res.setHeader(
+    response.header(
       'Set-Cookie',
       this.authenticationService.getCookiesForLogOut(),
     );
@@ -68,11 +70,11 @@ export class AuthController {
 
   @UseGuards(JwtRefreshGuard)
   @Get('refresh')
-  refresh(@Req() request: RequestWithUser) {
+  refresh(@Req() request: RequestWithUser, @Res() response: FastifyReply) {
     const accessTokenCookie =
       this.authenticationService.getCookieWithJwtAccessToken(request.user.id);
 
-    request.res.setHeader('Set-Cookie', accessTokenCookie);
+    response.header('Set-Cookie', accessTokenCookie);
     return request.user;
   }
 }
