@@ -9,11 +9,13 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { IPaginationOptions } from 'nestjs-typeorm-paginate';
 import { JwtAuthGuard } from 'src/modules/auth/guards';
+import { RequestWithUser } from 'src/modules/auth/types';
 import { ChannelsGateway } from 'src/modules/channels/channels.gateway';
 import { ChannelsService } from 'src/modules/channels/channels.service';
 import { AddChannelMembersDto } from 'src/modules/channels/dto/add-channel-members.dto';
@@ -49,20 +51,20 @@ export class ChannelsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':userId')
-  async getAllUserChannels(@Param('userId') userId: string) {
-    return this.channelsMembershipService.findAllUserChannels(userId);
+  @Get()
+  async getAllUserChannels(@Req() { user }: RequestWithUser) {
+    return this.channelsMembershipService.findAllUserChannels(user.id);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':channelId/:userId')
+  @Get(':channelId')
   async getById(
     @Param('channelId') channelId: string,
-    @Param('userId') userId: string,
+    @Req() { user }: RequestWithUser,
   ) {
     return this.channelsService.getChannelWithLastReadTimestamp(
       channelId,
-      userId,
+      user.id,
     );
   }
 
