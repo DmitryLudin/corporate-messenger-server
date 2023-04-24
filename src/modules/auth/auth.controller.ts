@@ -37,7 +37,10 @@ export class AuthController {
   @HttpCode(200)
   @UseGuards(LocalAuthGuard)
   @Post('log-in')
-  async logIn(@Req() request: RequestWithUser, @Res() response: FastifyReply) {
+  async logIn(
+    @Req() request: RequestWithUser,
+    @Res({ passthrough: true }) response: FastifyReply,
+  ) {
     const { user } = request;
     const accessTokenCookie =
       this.authenticationService.getCookieWithJwtAccessToken(user.id);
@@ -45,7 +48,7 @@ export class AuthController {
       this.authenticationService.getCookieWithJwtRefreshToken(user.id);
 
     await this.usersService.setCurrentRefreshToken(refreshToken, user.id);
-
+    console.log(user);
     response.header('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
 
     return user;

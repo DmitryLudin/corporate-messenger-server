@@ -19,8 +19,8 @@ import { RemoveChannelMemberDto } from 'src/modules/channels/dto/remove-channel-
 import { RemoveChannelMessageDto } from 'src/modules/channels/dto/remove-message.dto';
 import { UnreadChannelTimestampDto } from 'src/modules/channels/dto/unread-timestamp.dto';
 import { UpdateChannelMessageDto } from 'src/modules/channels/dto/update-message.dto';
+import { ChannelMessage } from 'src/modules/channels/entities/channel-message.entity';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
-import { ChannelMessage } from 'src/modules/channels/entities/message.entity';
 import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
 import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';

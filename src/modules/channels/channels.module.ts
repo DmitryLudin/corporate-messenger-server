@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from 'src/modules/auth/auth.module';
+import { ChannelMember } from 'src/modules/channels/entities/channel-member.entity';
+import { ChannelMessage } from 'src/modules/channels/entities/channel-message.entity';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
 import { UserChannelStatus } from 'src/modules/channels/entities/user-channel-status';
-import { ChannelMember } from 'src/modules/channels/entities/member.entity';
-import { ChannelMessage } from 'src/modules/channels/entities/message.entity';
 import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
 import { SyncUnreadChannelsService } from 'src/modules/channels/services/sync-unread-channels.service';
@@ -21,6 +22,7 @@ import { UnreadChannelsService } from 'src/modules/channels/services/unread-chan
     TypeOrmModule.forFeature([ChannelMessage]),
     TypeOrmModule.forFeature([UserChannelStatus]),
     UsersModule,
+    AuthModule,
   ],
   providers: [
     SyncUnreadChannelsService,

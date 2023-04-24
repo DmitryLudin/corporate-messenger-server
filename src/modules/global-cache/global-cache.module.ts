@@ -9,8 +9,8 @@ import { RedisClientOptions } from 'redis';
     CacheModule.registerAsync<RedisClientOptions>({
       imports: [ConfigModule],
       inject: [ConfigService],
+      isGlobal: true,
       useFactory: (configService: ConfigService) => ({
-        isGlobal: true,
         store: redisStore,
         url: `redis://${configService.get('REDIS_HOST')}:${configService.get(
           'REDIS_PORT',
@@ -18,5 +18,6 @@ import { RedisClientOptions } from 'redis';
       }),
     }),
   ],
+  exports: [CacheModule],
 })
 export class GlobalCacheModule {}

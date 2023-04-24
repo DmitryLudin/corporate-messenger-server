@@ -51,7 +51,7 @@ export class ChannelsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get()
+  @Get('self')
   async getAllUserChannels(@Req() { user }: RequestWithUser) {
     return this.channelsMembershipService.findAllUserChannels(user.id);
   }

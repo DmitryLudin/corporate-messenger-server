@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
 import { UnreadChannelTimestampDto } from 'src/modules/channels/dto/unread-timestamp.dto';
 import { UserChannelStatus } from 'src/modules/channels/entities/user-channel-status';
-import { ChannelMember } from 'src/modules/channels/entities/member.entity';
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
 import { Repository } from 'typeorm';
 
@@ -12,7 +11,7 @@ export class UnreadChannelsService {
   constructor(
     @Inject(CACHE_MANAGER)
     private cacheManager: Cache,
-    @InjectRepository(ChannelMember)
+    @InjectRepository(UserChannelStatus)
     private userChannelStatusRepository: Repository<UserChannelStatus>,
     private readonly messagesService: ChannelMessagesService,
   ) {}

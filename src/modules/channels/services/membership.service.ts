@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
 import { AddChannelMembersDto } from 'src/modules/channels/dto/add-channel-members.dto';
-import { ChannelMember } from 'src/modules/channels/entities/member.entity';
+import { ChannelMember } from 'src/modules/channels/entities/channel-member.entity';
 import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
 import { EntityManager, Repository } from 'typeorm';
 

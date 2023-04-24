@@ -4,7 +4,7 @@ import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
 import { CreateChannelMessageDto } from 'src/modules/channels/dto/create-message.dto';
 import { RemoveChannelMessageDto } from 'src/modules/channels/dto/remove-message.dto';
 import { UpdateChannelMessageDto } from 'src/modules/channels/dto/update-message.dto';
-import { ChannelMessage } from 'src/modules/channels/entities/message.entity';
+import { ChannelMessage } from 'src/modules/channels/entities/channel-message.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
