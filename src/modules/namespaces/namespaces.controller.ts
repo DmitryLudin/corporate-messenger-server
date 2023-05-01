@@ -16,7 +16,7 @@ import { NamespacesService } from './namespaces.service';
 import { CreateNamespaceDto } from './dto/create-namespace.dto';
 import { UpdateNamespaceDto } from './dto/update-namespace.dto';
 
-@Controller('namespaces')
+@Controller()
 export class NamespacesController {
   constructor(
     private readonly namespacesService: NamespacesService,
@@ -25,8 +25,14 @@ export class NamespacesController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createNamespaceDto: CreateNamespaceDto) {
-    return this.namespacesService.create(createNamespaceDto);
+  create(
+    @Req() request: RequestWithUser,
+    @Body() createNamespaceDto: CreateNamespaceDto,
+  ) {
+    return this.namespacesService.create({
+      ...createNamespaceDto,
+      userId: request.user.id,
+    });
   }
 
   @UseGuards(JwtAuthGuard)

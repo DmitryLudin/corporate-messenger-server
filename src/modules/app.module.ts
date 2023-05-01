@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { RouterModule } from '@nestjs/core';
 import { configSchema } from 'src/const/config.schema';
 import { AuthModule } from 'src/modules/auth/auth.module';
 import { ChannelsModule } from 'src/modules/channels/channels.module';
@@ -19,6 +20,18 @@ import { NamespacesModule } from './namespaces/namespaces.module';
     ChannelsModule,
     GlobalCacheModule,
     NamespacesModule,
+    RouterModule.register([
+      {
+        path: 'namespaces',
+        module: NamespacesModule,
+        children: [
+          {
+            path: ':namespaceId',
+            module: ChannelsModule,
+          },
+        ],
+      },
+    ]),
   ],
 })
 export class AppModule {}

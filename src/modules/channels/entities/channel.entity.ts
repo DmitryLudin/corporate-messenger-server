@@ -4,15 +4,20 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Unique,
 } from 'typeorm';
 
 @Entity()
+@Unique(['name', 'namespaceId'])
 export class Channel {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
+  @Column()
   name: string;
+
+  @Column()
+  namespaceId: string;
 
   @Column({ nullable: true })
   displayName?: string;

@@ -3,7 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Namespace } from 'src/modules/namespaces/entities/namespace.entity';
 import { CreateNamespaceTransaction } from 'src/modules/namespaces/transactions/create-namespace.transaction';
 import { Repository } from 'typeorm';
-import { CreateNamespaceDto } from './dto/create-namespace.dto';
+import {
+  CreateNamespaceDto,
+  CreateNamespaceWithUserIdDto,
+} from './dto/create-namespace.dto';
 import { UpdateNamespaceDto } from './dto/update-namespace.dto';
 
 @Injectable()
@@ -14,7 +17,7 @@ export class NamespacesService {
     private readonly createNamespaceTransaction: CreateNamespaceTransaction,
   ) {}
 
-  async create(dto: CreateNamespaceDto) {
+  async create(dto: CreateNamespaceWithUserIdDto) {
     const namespace = await this.createNamespaceTransaction.run(dto);
     return this.findOne(namespace.id);
   }

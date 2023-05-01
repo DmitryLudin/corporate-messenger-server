@@ -14,6 +14,9 @@ export class ChannelMember {
   @PrimaryGeneratedColumn('uuid')
   id: number;
 
+  @Column()
+  namespaceId: string;
+
   @ManyToOne(() => Channel, { onDelete: 'CASCADE', cascade: true })
   @JoinColumn({ name: 'channelId' })
   channel: Channel;

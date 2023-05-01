@@ -8,6 +8,9 @@ export class CreateChannelDto {
   userId: string;
 
   @IsString()
+  namespaceId: string;
+
+  @IsString()
   @IsOptional()
   description?: string;
 

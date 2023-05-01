@@ -21,21 +21,20 @@ export class ChannelCreationTransaction extends BaseTransaction<
     { userId, members, ...others }: CreateChannelDto,
     manager: EntityManager,
   ): Promise<Channel> {
-    const channel = manager.create<Channel>(Channel, others);
+    const channel = await manager.save(
+      manager.create<Channel>(Channel, others),
+    );
     let userIds = [userId];
 
     if (members?.length > 0) {
       userIds = userIds.concat(members);
     }
 
-    await Promise.all([
-      this.channelsMembershipService.createMultiple(
-        channel.id,
-        { userIds },
-        manager,
-      ),
-      manager.insert(Channel, channel),
-    ]);
+    await this.channelsMembershipService.createMultiple(
+      channel.id,
+      { userIds, namespaceId: others.namespaceId },
+      manager,
+    );
 
     return channel;
   }

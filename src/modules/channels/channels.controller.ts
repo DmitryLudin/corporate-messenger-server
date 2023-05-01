@@ -52,8 +52,14 @@ export class ChannelsController {
 
   @UseGuards(JwtAuthGuard)
   @Get('self')
-  async getAllUserChannels(@Req() { user }: RequestWithUser) {
-    return this.channelsMembershipService.findAllUserChannels(user.id);
+  async getAllUserChannels(
+    @Param('namespaceId') namespaceId: string,
+    @Req() { user }: RequestWithUser,
+  ) {
+    return this.channelsMembershipService.findAllUserChannels(
+      user.id,
+      namespaceId,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -70,8 +76,8 @@ export class ChannelsController {
 
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() data: UpdateChannelDto) {
+  @Patch(':channelId')
+  async update(@Param('channelId') id: string, @Body() data: UpdateChannelDto) {
     const channel = await this.channelsService.update(id, data);
     this.channelsGateway.emitUpdatedChannel(channel);
     return channel;
@@ -79,16 +85,16 @@ export class ChannelsController {
 
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
+  @Delete(':channelId')
+  async remove(@Param('channelId') id: string) {
     await this.channelsService.remove(id);
     this.channelsGateway.emitRemovedChannel(id);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':id/members')
+  @Get(':channelId/members')
   async getChannelMembers(
-    @Param('id') channelId: string,
+    @Param('channelId') channelId: string,
     @Query() options: IPaginationOptions,
   ) {
     return this.channelsMembershipService.findAllChannelMembers(
@@ -99,20 +105,24 @@ export class ChannelsController {
 
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  @Post(':id/members')
+  @Post(':channelId/members')
   async addNewMembers(
-    @Param('id') channelId: string,
+    @Param('namespaceId') namespaceId: string,
+    @Param('channelId') channelId: string,
     @Body() data: AddChannelMembersDto,
   ) {
-    await this.channelsMembershipService.createMultiple(channelId, data);
+    await this.channelsMembershipService.createMultiple(channelId, {
+      ...data,
+      namespaceId,
+    });
     return this.channelsGateway.emitNewChannelMembers(channelId, data);
   }
 
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  @Delete(':id/members')
+  @Delete(':channelId/members')
   async removeMember(
-    @Param('id') channelId: string,
+    @Param('channelId') channelId: string,
     @Body() data: RemoveChannelMemberDto,
   ) {
     await this.channelsMembershipService.remove(channelId, data.userId);
@@ -120,9 +130,9 @@ export class ChannelsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':id/messages')
+  @Get(':channelId/messages')
   async getChannelMessages(
-    @Param('id') channelId: string,
+    @Param('channelId') channelId: string,
     @Query() options: IPaginationOptions,
   ) {
     return this.channelMessagesService.findAll(channelId, options);

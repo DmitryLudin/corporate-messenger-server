@@ -2,7 +2,6 @@ import { ClassSerializerInterceptor, UseInterceptors } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
-  OnGatewayConnection,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -11,7 +10,6 @@ import {
 import { instanceToPlain } from 'class-transformer';
 import { Server, Socket } from 'socket.io';
 import { cors } from 'src/const/cors';
-import { AuthService } from 'src/modules/auth/auth.service';
 import { ChannelsEventEnum } from 'src/modules/channels/const/channels-event.enum';
 import { AddChannelMembersDto } from 'src/modules/channels/dto/add-channel-members.dto';
 import { CreateChannelMessageDto } from 'src/modules/channels/dto/create-message.dto';
@@ -27,7 +25,7 @@ import { UnreadChannelsService } from 'src/modules/channels/services/unread-chan
 import { UsersService } from 'src/modules/users/users.service';
 
 @WebSocketGateway({ cors, namespace: 'channels' })
-export class ChannelsGateway implements OnGatewayConnection {
+export class ChannelsGateway {
   @WebSocketServer()
   private readonly server: Server;
 
@@ -35,17 +33,8 @@ export class ChannelsGateway implements OnGatewayConnection {
     private readonly channelsMembershipService: ChannelsMembershipService,
     private readonly channelMessagesService: ChannelMessagesService,
     private readonly unreadChannelsService: UnreadChannelsService,
-    private readonly authService: AuthService,
     private readonly usersService: UsersService,
   ) {}
-
-  async handleConnection(client: Socket) {
-    const user = await this.authService.getUserFromSocket(client);
-    const channels = await this.channelsMembershipService.findAllUserChannels(
-      user.id,
-    );
-    channels.forEach((channel) => client.join(channel.id));
-  }
 
   emitNewChannel(userIds: string[], channel: Channel) {
     this.server.to(userIds).emit(ChannelsEventEnum.NEW_CHANNEL, {

@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
-import { AddChannelMembersDto } from 'src/modules/channels/dto/add-channel-members.dto';
+import {
+  AddChannelMembersDto,
+  AddChannelMembersWithNamespaceDto,
+} from 'src/modules/channels/dto/add-channel-members.dto';
 import { ChannelMember } from 'src/modules/channels/entities/channel-member.entity';
 import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
 import { EntityManager, Repository } from 'typeorm';
@@ -16,21 +19,21 @@ export class ChannelsMembershipService {
 
   async createMultiple(
     channelId: string,
-    { userIds }: AddChannelMembersDto,
+    { userIds, namespaceId }: AddChannelMembersWithNamespaceDto,
     transactionManager?: EntityManager,
   ) {
     const repository = this.getRepository(transactionManager);
 
     const members = userIds.map((userId: string) =>
-      repository.create({ channelId, userId }),
+      repository.create({ channelId, userId, namespaceId }),
     );
 
     return await repository.insert(members);
   }
 
-  async findAllUserChannels(userId: string) {
+  async findAllUserChannels(userId: string, namespaceId: string) {
     const channelsMembership = await this.channelMembersRepository.find({
-      where: { userId },
+      where: { userId, namespaceId },
       relations: ['channel'],
       select: ['channel'],
     });

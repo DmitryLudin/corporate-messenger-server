@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from 'src/modules/auth/auth.module';
 import { ChannelMember } from 'src/modules/channels/entities/channel-member.entity';
 import { ChannelMessage } from 'src/modules/channels/entities/channel-message.entity';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
@@ -17,12 +16,13 @@ import { UnreadChannelsService } from 'src/modules/channels/services/unread-chan
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Channel]),
-    TypeOrmModule.forFeature([ChannelMember]),
-    TypeOrmModule.forFeature([ChannelMessage]),
-    TypeOrmModule.forFeature([UserChannelStatus]),
+    TypeOrmModule.forFeature([
+      Channel,
+      ChannelMember,
+      ChannelMessage,
+      UserChannelStatus,
+    ]),
     UsersModule,
-    AuthModule,
   ],
   providers: [
     SyncUnreadChannelsService,
@@ -34,6 +34,10 @@ import { UnreadChannelsService } from 'src/modules/channels/services/unread-chan
     ChannelsGateway,
   ],
   controllers: [ChannelsController],
-  exports: [ChannelsService, ChannelCreationTransaction],
+  exports: [
+    ChannelsService,
+    ChannelsMembershipService,
+    ChannelCreationTransaction,
+  ],
 })
 export class ChannelsModule {}

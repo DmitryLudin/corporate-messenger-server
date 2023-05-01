@@ -43,19 +43,6 @@ export class AuthService {
     }
   }
 
-  async getAuthenticatedUser(username: string, plainTextPassword: string) {
-    try {
-      const user = await this.usersService.getByUsername(username);
-      await this.verifyPassword(plainTextPassword, user.password);
-      return user;
-    } catch {
-      throw new HttpException(
-        'Предоставленны неверные учетные данные',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
-
   getCookieWithJwtAccessToken(userId: string) {
     const payload: TokenPayload = { userId };
     const token = this.jwtService.sign(payload, {
@@ -100,6 +87,19 @@ export class AuthService {
 
     if (payload.userId) {
       return this.usersService.getById(payload.userId);
+    }
+  }
+
+  async getAuthenticatedUser(username: string, plainTextPassword: string) {
+    try {
+      const user = await this.usersService.getByUsername(username);
+      await this.verifyPassword(plainTextPassword, user.password);
+      return user;
+    } catch {
+      throw new HttpException(
+        'Предоставленны неверные учетные данные',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 

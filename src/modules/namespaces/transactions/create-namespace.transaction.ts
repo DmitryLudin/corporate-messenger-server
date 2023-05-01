@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { BaseTransaction } from 'src/core/base-transaction';
 import { ChannelCreationTransaction } from 'src/modules/channels/transactions/create-channel.transaction';
-import { CreateNamespaceDto } from 'src/modules/namespaces/dto/create-namespace.dto';
+import { CreateNamespaceWithUserIdDto } from 'src/modules/namespaces/dto/create-namespace.dto';
 import { Namespace } from 'src/modules/namespaces/entities/namespace.entity';
 import { NamespaceMembersService } from 'src/modules/namespaces/services/members.service';
 import { DataSource, EntityManager } from 'typeorm';
 
 @Injectable()
 export class CreateNamespaceTransaction extends BaseTransaction<
-  CreateNamespaceDto,
+  CreateNamespaceWithUserIdDto,
   Namespace
 > {
   constructor(
@@ -20,24 +20,30 @@ export class CreateNamespaceTransaction extends BaseTransaction<
   }
 
   protected async execute(
-    { userId, ...other }: CreateNamespaceDto,
+    { userId, ...other }: CreateNamespaceWithUserIdDto,
     manager: EntityManager,
   ): Promise<Namespace> {
-    const namespace = manager.create<Namespace>(Namespace, other);
+    const namespace = await manager.save<Namespace>(
+      manager.create<Namespace>(Namespace, other),
+    );
 
-    await Promise.all([
-      this.namespaceMembersService.create(namespace.id, userId, manager),
-      this.channelCreationTransaction.runWithinTransaction(
-        {
-          userId,
-          members: [userId],
-          name: 'general',
-          displayName: 'general',
-        },
-        manager,
-      ),
-      manager.insert(Namespace, namespace),
-    ]);
+    try {
+      await Promise.all([
+        this.namespaceMembersService.create(namespace.id, userId, manager),
+        this.channelCreationTransaction.runWithinTransaction(
+          {
+            userId,
+            members: [userId],
+            namespaceId: namespace.id,
+            name: 'general',
+            displayName: 'general',
+          },
+          manager,
+        ),
+      ]);
+    } catch (error) {
+      console.log(error);
+    }
 
     return namespace;
   }

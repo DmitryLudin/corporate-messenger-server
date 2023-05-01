@@ -12,7 +12,7 @@ import {
 @Entity()
 export class NamespaceMember {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
   @ManyToOne(() => Namespace, { onDelete: 'CASCADE', cascade: true })
   @JoinColumn({ name: 'namespaceId' })
