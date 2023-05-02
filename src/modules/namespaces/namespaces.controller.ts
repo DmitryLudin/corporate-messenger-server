@@ -42,9 +42,9 @@ export class NamespacesController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.namespacesService.findOne(id);
+  @Get(':name')
+  findOne(@Param('name') name: string) {
+    return this.namespacesService.findByName(name);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -2,7 +2,7 @@ import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
-import { UserChannelStatus } from 'src/modules/channels/entities/user-channel-status';
+import { UserChannelStatus } from 'src/modules/channels/entities/user-channel-status.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

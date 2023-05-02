@@ -33,7 +33,6 @@ export class CreateNamespaceTransaction extends BaseTransaction<
         this.channelCreationTransaction.runWithinTransaction(
           {
             userId,
-            members: [userId],
             namespaceId: namespace.id,
             name: 'general',
             displayName: 'general',

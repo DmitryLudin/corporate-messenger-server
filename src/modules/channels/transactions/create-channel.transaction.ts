@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { BaseTransaction } from 'src/core/base-transaction';
 import { CreateChannelDto } from 'src/modules/channels/dto/create-channel.dto';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
+import { UserChannelStatus } from 'src/modules/channels/entities/user-channel-status.entity';
 import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 
 @Injectable()
 export class ChannelCreationTransaction extends BaseTransaction<
@@ -13,6 +15,8 @@ export class ChannelCreationTransaction extends BaseTransaction<
   constructor(
     dataSource: DataSource,
     private readonly channelsMembershipService: ChannelsMembershipService,
+    @InjectRepository(UserChannelStatus)
+    private userChannelStatusRepository: Repository<UserChannelStatus>,
   ) {
     super(dataSource);
   }
@@ -30,11 +34,13 @@ export class ChannelCreationTransaction extends BaseTransaction<
       userIds = userIds.concat(members);
     }
 
-    await this.channelsMembershipService.createMultiple(
-      channel.id,
-      { userIds, namespaceId: others.namespaceId },
-      manager,
-    );
+    await Promise.all([
+      this.channelsMembershipService.createMultiple(
+        channel.id,
+        { userIds, namespaceId: others.namespaceId },
+        manager,
+      ),
+    ]);
 
     return channel;
   }

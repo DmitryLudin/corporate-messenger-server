@@ -2,7 +2,7 @@ import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
 import { UnreadChannelTimestampDto } from 'src/modules/channels/dto/unread-timestamp.dto';
-import { UserChannelStatus } from 'src/modules/channels/entities/user-channel-status';
+import { UserChannelStatus } from 'src/modules/channels/entities/user-channel-status.entity';
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
 import { Repository } from 'typeorm';
 
@@ -53,7 +53,7 @@ export class UnreadChannelsService {
         where: { userId, channelId },
       });
 
-      return userChannelStatus.isUnread;
+      return userChannelStatus?.isUnread || false;
     }
 
     return isUnread === 1;

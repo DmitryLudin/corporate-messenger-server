@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Namespace } from 'src/modules/namespaces/entities/namespace.entity';
 import { CreateNamespaceTransaction } from 'src/modules/namespaces/transactions/create-namespace.transaction';
@@ -19,20 +19,35 @@ export class NamespacesService {
 
   async create(dto: CreateNamespaceWithUserIdDto) {
     const namespace = await this.createNamespaceTransaction.run(dto);
-    return this.findOne(namespace.id);
+    return this.findById(namespace.id);
   }
 
   async findAll() {
     return this.namespaceRepository.find();
   }
 
-  async findOne(id: string) {
+  async findById(id: string) {
     return this.namespaceRepository.findOne({ where: { id } });
+  }
+
+  async findByName(name: string) {
+    const namespace = await this.namespaceRepository.findOne({
+      where: { name },
+    });
+
+    if (!namespace) {
+      throw new HttpException(
+        'Пространства с таким иенем не существует',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return namespace;
   }
 
   async update(id: string, dto: UpdateNamespaceDto) {
     await this.namespaceRepository.update({ id }, dto);
-    return this.findOne(id);
+    return this.findById(id);
   }
 
   async remove(id: string) {

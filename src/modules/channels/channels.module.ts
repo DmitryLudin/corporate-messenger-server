@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChannelMember } from 'src/modules/channels/entities/channel-member.entity';
 import { ChannelMessage } from 'src/modules/channels/entities/channel-message.entity';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
-import { UserChannelStatus } from 'src/modules/channels/entities/user-channel-status';
+import { UserChannelStatus } from 'src/modules/channels/entities/user-channel-status.entity';
 import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
 import { SyncUnreadChannelsService } from 'src/modules/channels/services/sync-unread-channels.service';

@@ -57,7 +57,10 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('log-out')
   @HttpCode(200)
-  async logOut(@Req() request: RequestWithUser, @Res() response: FastifyReply) {
+  async logOut(
+    @Req() request: RequestWithUser,
+    @Res({ passthrough: true }) response: FastifyReply,
+  ) {
     await this.usersService.removeRefreshToken(request.user.id);
     response.header(
       'Set-Cookie',
@@ -73,7 +76,10 @@ export class AuthController {
 
   @UseGuards(JwtRefreshGuard)
   @Get('refresh')
-  refresh(@Req() request: RequestWithUser, @Res() response: FastifyReply) {
+  refresh(
+    @Req() request: RequestWithUser,
+    @Res({ passthrough: true }) response: FastifyReply,
+  ) {
     const accessTokenCookie =
       this.authenticationService.getCookieWithJwtAccessToken(request.user.id);
 
