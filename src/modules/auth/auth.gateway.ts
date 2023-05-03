@@ -3,7 +3,7 @@ import { Socket } from 'socket.io';
 import { cors } from 'src/const/cors';
 import { AuthService } from 'src/modules/auth/auth.service';
 
-@WebSocketGateway({ cors })
+@WebSocketGateway({ cors, namespace: 'users' })
 export class AuthGateway implements OnGatewayConnection {
   constructor(private readonly authService: AuthService) {}
 

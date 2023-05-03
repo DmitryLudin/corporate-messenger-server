@@ -28,9 +28,9 @@ export abstract class BaseTransaction<TransactionInput, TransactionOutput> {
       const result = await this.execute(data, queryRunner.manager);
       await queryRunner.commitTransaction();
       return result;
-    } catch (error) {
+    } catch (error: unknown) {
       await queryRunner.rollbackTransaction();
-      throw new Error('Transaction failed');
+      throw error;
     } finally {
       await queryRunner.release();
     }

@@ -1,4 +1,5 @@
 export enum ChannelsEventEnum {
+  JOIN_CHANNELS = 'join_channels',
   NEW_CHANNEL = 'new_channel',
   CHANNEL_UPDATED = 'channel_updated',
   CHANNEL_REMOVED = 'channel_removed',
