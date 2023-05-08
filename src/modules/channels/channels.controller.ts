@@ -44,9 +44,17 @@ export class ChannelsController {
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   @Post('create')
-  async create(@Body() data: CreateChannelDto) {
-    const channel = await this.channelsService.create(data);
-    this.channelsGateway.emitNewChannel(data.members, channel);
+  async create(
+    @Param('namespaceId') namespaceId: string,
+    @Body() data: CreateChannelDto,
+    @Req() { user }: RequestWithUser,
+  ) {
+    const channel = await this.channelsService.create({
+      ...data,
+      namespaceId,
+      userId: user.id,
+    });
+    this.channelsGateway.emitNewChannel(channel, data.members);
     return channel;
   }
 

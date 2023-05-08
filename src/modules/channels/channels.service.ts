@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
-import { CreateChannelDto } from 'src/modules/channels/dto/create-channel.dto';
+import { CreateChannelWithMetaDto } from 'src/modules/channels/dto/create-channel.dto';
 import { UpdateChannelDto } from 'src/modules/channels/dto/update-channel.dto';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
 import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
@@ -40,7 +40,7 @@ export class ChannelsService {
     };
   }
 
-  async create(data: CreateChannelDto): Promise<Channel> {
+  async create(data: CreateChannelWithMetaDto): Promise<Channel> {
     const channel = await this.createChannelTransaction.run(data);
     return this.findOne(channel.id);
   }

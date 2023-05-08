@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseTransaction } from 'src/core/base-transaction';
-import { CreateChannelDto } from 'src/modules/channels/dto/create-channel.dto';
+import { CreateChannelWithMetaDto } from 'src/modules/channels/dto/create-channel.dto';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
 import { UserChannelStatus } from 'src/modules/channels/entities/user-channel-status.entity';
 import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
@@ -9,7 +9,7 @@ import { DataSource, EntityManager, Repository } from 'typeorm';
 
 @Injectable()
 export class ChannelCreationTransaction extends BaseTransaction<
-  CreateChannelDto,
+  CreateChannelWithMetaDto,
   Channel
 > {
   constructor(
@@ -22,7 +22,7 @@ export class ChannelCreationTransaction extends BaseTransaction<
   }
 
   protected async execute(
-    { userId, members, ...others }: CreateChannelDto,
+    { userId, members, ...others }: CreateChannelWithMetaDto,
     manager: EntityManager,
   ): Promise<Channel> {
     const channel = await manager.save(

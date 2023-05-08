@@ -5,12 +5,6 @@ export class CreateChannelDto {
   name: string;
 
   @IsString()
-  userId: string;
-
-  @IsString()
-  namespaceId: string;
-
-  @IsString()
   @IsOptional()
   description?: string;
 
@@ -20,5 +14,13 @@ export class CreateChannelDto {
 
   @IsArray()
   @IsOptional()
-  members?: string[];
+  members?: Array<string> | undefined;
+}
+
+export class CreateChannelWithMetaDto extends CreateChannelDto {
+  @IsString()
+  namespaceId: string;
+
+  @IsString()
+  userId: string;
 }

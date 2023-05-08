@@ -50,27 +50,27 @@ export class ChannelsGateway
     console.log('namespace disconnected', client.id);
   }
 
-  emitNewChannel(userIds: string[], channel: Channel) {
-    this.server.to(userIds).emit(ChannelsEventEnum.NEW_CHANNEL, {
-      channel: this.deserializeData(channel),
-    });
+  emitNewChannel(channel: Channel, userIds: Array<string>) {
+    if (userIds && userIds.length) {
+      this.server.to(userIds).emit(ChannelsEventEnum.NEW, {
+        channel: this.deserializeData(channel),
+      });
+    }
   }
 
   emitUpdatedChannel(channel: Channel) {
-    this.server.to(channel.id).emit(ChannelsEventEnum.CHANNEL_UPDATED, {
+    this.server.to(channel.id).emit(ChannelsEventEnum.UPDATED, {
       channel: this.deserializeData(channel),
     });
   }
 
   emitRemovedChannel(channelId: string) {
-    this.server
-      .to(channelId)
-      .emit(ChannelsEventEnum.CHANNEL_REMOVED, { channelId });
+    this.server.to(channelId).emit(ChannelsEventEnum.REMOVED, { channelId });
   }
 
   async emitNewChannelMembers(channelId: string, data: AddChannelMembersDto) {
     const users = await this.usersService.getByIds(data.userIds);
-    this.server.to(channelId).emit(ChannelsEventEnum.NEW_CHANNEL_MEMBERS, {
+    this.server.to(channelId).emit(ChannelsEventEnum.MEMBERS_ADDED, {
       users: this.deserializeData(users),
     });
   }
@@ -80,7 +80,7 @@ export class ChannelsGateway
     data: RemoveChannelMemberDto,
   ) {
     const user = await this.usersService.getById(data.userId);
-    this.server.to(channelId).emit(ChannelsEventEnum.REMOVED_CHANNEL_MEMBER, {
+    this.server.to(channelId).emit(ChannelsEventEnum.MEMBER_REMOVED, {
       users: this.deserializeData(user),
     });
   }
@@ -100,14 +100,14 @@ export class ChannelsGateway
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
-  @SubscribeMessage(ChannelsEventEnum.CHANNEL_MESSAGE)
+  @SubscribeMessage(ChannelsEventEnum.MESSAGE)
   async handleMessageEvent(
     @MessageBody() data: CreateChannelMessageDto,
     @ConnectedSocket() client: Socket,
   ) {
     const message = await this.channelMessagesService.create(data);
 
-    client.to(data.channelId).emit(ChannelsEventEnum.CHANNEL_MESSAGE, message);
+    client.to(data.channelId).emit(ChannelsEventEnum.MESSAGE, message);
 
     const memberships =
       await this.channelsMembershipService.findAllChannelMembership(
@@ -116,7 +116,7 @@ export class ChannelsGateway
 
     memberships.forEach(({ user }) => {
       this.unreadChannelsService.markAsUnread(user.id, data.channelId);
-      client.to(user.id).emit(ChannelsEventEnum.UNREAD_CHANNEL, {
+      client.to(user.id).emit(ChannelsEventEnum.UNREAD, {
         channelId: data.channelId,
       });
     });
@@ -154,7 +154,7 @@ export class ChannelsGateway
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
-  @SubscribeMessage(ChannelsEventEnum.UNREAD_CHANNEL_TIMESTAMP)
+  @SubscribeMessage(ChannelsEventEnum.UNREAD_TIMESTAMP)
   async handleUpdateChannelTimestampEvent(
     @MessageBody() data: UnreadChannelTimestampDto,
   ) {
