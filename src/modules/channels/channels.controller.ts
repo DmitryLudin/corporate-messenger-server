@@ -37,8 +37,11 @@ export class ChannelsController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  async getAll(@Query() options: IPaginationOptions) {
-    return this.channelsService.findAll(options);
+  async getAll(
+    @Param('namespaceId') namespaceId: string,
+    @Query() options: IPaginationOptions,
+  ) {
+    return this.channelsService.findAll(namespaceId, options);
   }
 
   @HttpCode(200)
@@ -46,8 +49,8 @@ export class ChannelsController {
   @Post('create')
   async create(
     @Param('namespaceId') namespaceId: string,
-    @Body() data: CreateChannelDto,
     @Req() { user }: RequestWithUser,
+    @Body() data: CreateChannelDto,
   ) {
     const channel = await this.channelsService.create({
       ...data,
@@ -59,7 +62,7 @@ export class ChannelsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('self')
+  @Get('me')
   async getAllUserChannels(
     @Param('namespaceId') namespaceId: string,
     @Req() { user }: RequestWithUser,
@@ -77,12 +80,12 @@ export class ChannelsController {
     @Param('channelName') channelName: string,
     @Req() { user }: RequestWithUser,
   ) {
-    return this.channelsService.getByName(namespaceId, channelName, user.id);
+    return this.channelsService.findByName(namespaceId, channelName, user.id);
   }
 
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  @Patch(':channelId')
+  @Patch(':channelId/update')
   async update(
     @Param('channelId') id: string,
     @Body() data: UpdateChannelDto,
@@ -94,14 +97,6 @@ export class ChannelsController {
     });
     this.channelsGateway.emitUpdatedChannel(channel);
     return channel;
-  }
-
-  @HttpCode(200)
-  @UseGuards(JwtAuthGuard)
-  @Delete(':channelId')
-  async remove(@Param('channelId') id: string) {
-    await this.channelsService.remove(id);
-    this.channelsGateway.emitRemovedChannel(id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -118,7 +113,7 @@ export class ChannelsController {
 
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  @Post(':channelId/members')
+  @Post(':channelId/members/add')
   async addNewMembers(
     @Param('namespaceId') namespaceId: string,
     @Param('channelId') channelId: string,
@@ -133,7 +128,7 @@ export class ChannelsController {
 
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  @Delete(':channelId/members')
+  @Delete(':channelId/members/remove')
   async removeMember(
     @Param('channelId') channelId: string,
     @Body() data: RemoveChannelMemberDto,

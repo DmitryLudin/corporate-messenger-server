@@ -40,6 +40,7 @@ import { UnreadChannelsService } from 'src/modules/channels/services/unread-chan
     ChannelsService,
     ChannelsMembershipService,
     CreateChannelTransaction,
+    ChannelsGateway,
   ],
 })
 export class ChannelsModule {}

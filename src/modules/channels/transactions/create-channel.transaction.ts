@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { BaseTransaction } from 'src/core/base-transaction';
 import { CreateChannelWithMetaDto } from 'src/modules/channels/dto/create-channel.dto';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
-import { UserChannelStatus } from 'src/modules/channels/entities/user-channel-status.entity';
 import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
+import { DataSource, EntityManager } from 'typeorm';
 
 @Injectable()
 export class CreateChannelTransaction extends BaseTransaction<
@@ -15,8 +14,7 @@ export class CreateChannelTransaction extends BaseTransaction<
   constructor(
     dataSource: DataSource,
     private readonly channelsMembershipService: ChannelsMembershipService,
-    @InjectRepository(UserChannelStatus)
-    private userChannelStatusRepository: Repository<UserChannelStatus>,
+    private unreadChannelsService: UnreadChannelsService,
   ) {
     super(dataSource);
   }
@@ -40,6 +38,11 @@ export class CreateChannelTransaction extends BaseTransaction<
         { userIds, namespaceId: others.namespaceId },
         manager,
       ),
+      this.unreadChannelsService.markAsRead({
+        userId,
+        channelId: channel.id,
+        timestamp: channel.createdAt.getTime(),
+      }),
     ]);
 
     return channel;

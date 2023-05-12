@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
+import { ChannelsGateway } from 'src/modules/channels/channels.gateway';
 import { CreateChannelWithMetaDto } from 'src/modules/channels/dto/create-channel.dto';
 import { UpdateChannelDtoWithMeta } from 'src/modules/channels/dto/update-channel.dto';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
@@ -15,13 +16,16 @@ export class ChannelsService {
     private channelsRepository: Repository<Channel>,
     private readonly createChannelTransaction: CreateChannelTransaction,
     private readonly unreadChannelsService: UnreadChannelsService,
+    private readonly channelsGateway: ChannelsGateway,
   ) {}
 
-  async findAll(options: IPaginationOptions) {
-    return paginate(this.channelsRepository, options);
+  async findAll(namespaceId: string, options: IPaginationOptions) {
+    return paginate(this.channelsRepository, options, {
+      where: { namespaceId },
+    });
   }
 
-  async findOne(id: string, userId: string) {
+  async findById(id: string, userId: string) {
     const channel = await this.channelsRepository.findOne({ where: { id } });
 
     if (!channel) {
@@ -31,13 +35,16 @@ export class ChannelsService {
       );
     }
 
+    const lastReadTimestamp =
+      await this.unreadChannelsService.getLastReadTimestamp(userId, channel.id);
+
     return {
       ...channel,
-      isUnread: await this.unreadChannelsService.isUnread(userId, id),
+      lastReadTimestamp,
     };
   }
 
-  async getByName(namespaceId: string, channelName: string, userId: string) {
+  async findByName(namespaceId: string, channelName: string, userId: string) {
     const channel = await this.channelsRepository.findOne({
       where: { namespaceId, name: channelName },
     });
@@ -49,21 +56,18 @@ export class ChannelsService {
       );
     }
 
-    // const lastRead = await this.unreadChannelsService.getLastRead(
-    //   userId,
-    //   channel.id,
-    // );
+    const lastReadTimestamp =
+      await this.unreadChannelsService.getLastReadTimestamp(userId, channel.id);
 
     return {
       ...channel,
-      isUnread: await this.unreadChannelsService.isUnread(userId, channel.id),
-      // lastReadTimestamp,
+      lastReadTimestamp,
     };
   }
 
   async create(data: CreateChannelWithMetaDto): Promise<Channel> {
     const channel = await this.createChannelTransaction.run(data);
-    return this.findOne(channel.id, data.userId);
+    return this.findById(channel.id, data.userId);
   }
 
   async update(
@@ -71,10 +75,6 @@ export class ChannelsService {
     data: UpdateChannelDtoWithMeta,
   ): Promise<Channel> {
     await this.channelsRepository.update(channelId, data);
-    return this.findOne(channelId, data.userId);
-  }
-
-  async remove(id: string): Promise<void> {
-    await this.channelsRepository.delete(id);
+    return this.findById(channelId, data.userId);
   }
 }

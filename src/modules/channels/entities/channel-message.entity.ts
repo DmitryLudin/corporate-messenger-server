@@ -42,6 +42,6 @@ export class ChannelMessage {
   updatedAt: Date;
 
   get timestamp() {
-    return this.createdAt.getTime() / 1000;
+    return this.createdAt.getTime();
   }
 }

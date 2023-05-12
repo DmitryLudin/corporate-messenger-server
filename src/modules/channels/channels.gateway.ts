@@ -64,10 +64,6 @@ export class ChannelsGateway
     });
   }
 
-  emitRemovedChannel(channelId: string) {
-    this.server.to(channelId).emit(ChannelsEventEnum.REMOVED, { channelId });
-  }
-
   async emitNewChannelMembers(channelId: string, data: AddChannelMembersDto) {
     const users = await this.usersService.getByIds(data.userIds);
     this.server.to(channelId).emit(ChannelsEventEnum.MEMBERS_ADDED, {

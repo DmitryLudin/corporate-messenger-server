@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BaseTransaction } from 'src/core/base-transaction';
+import { ChannelsGateway } from 'src/modules/channels/channels.gateway';
 import { ChannelsService } from 'src/modules/channels/channels.service';
 import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
 import { JoinNamespaceTransactionDto } from 'src/modules/namespaces/dto/join-namespace.dto';
@@ -16,6 +17,7 @@ export class JoinNamespaceTransaction extends BaseTransaction<
     private readonly namespaceMembersService: NamespaceMembersService,
     private readonly channelsMembershipService: ChannelsMembershipService,
     private readonly channelsService: ChannelsService,
+    private readonly channelsGateway: ChannelsGateway,
   ) {
     super(dataSource);
   }
@@ -25,7 +27,7 @@ export class JoinNamespaceTransaction extends BaseTransaction<
     manager: EntityManager,
   ): Promise<void> {
     try {
-      const channel = await this.channelsService.getByName(
+      const channel = await this.channelsService.findByName(
         namespaceId,
         'general',
         userId,
@@ -37,11 +39,15 @@ export class JoinNamespaceTransaction extends BaseTransaction<
           channel.id,
           {
             userIds: [userId],
-            namespaceId: namespaceId,
+            namespaceId,
           },
           manager,
         ),
       ]);
+
+      return this.channelsGateway.emitNewChannelMembers(channel.id, {
+        userIds: [userId],
+      });
     } catch (error) {
       console.log(error);
     }

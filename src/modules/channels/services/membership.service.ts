@@ -36,13 +36,17 @@ export class ChannelsMembershipService {
     });
 
     return Promise.all(
-      channelsMembership.map(async (membership) => ({
-        ...membership.channel,
-        isUnread: await this.unreadChannelsService.isUnread(
+      channelsMembership.map(async (membership) => {
+        const isUnreadChannel = await this.unreadChannelsService.isUnread(
           userId,
           membership.channelId,
-        ),
-      })),
+        );
+
+        return {
+          ...membership.channel,
+          isUnread: isUnreadChannel,
+        };
+      }),
     );
   }
 

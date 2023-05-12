@@ -59,7 +59,7 @@ export class UnreadChannelsService {
     return isUnread === 1;
   }
 
-  async getLastRead(userId: string, channelId: string) {
+  async getLastReadTimestamp(userId: string, channelId: string) {
     const lastReadKey = `channelLastRead:${userId}:${channelId}`;
     const lastReadTimestamp = await this.cacheManager.get<number | undefined>(
       lastReadKey,
