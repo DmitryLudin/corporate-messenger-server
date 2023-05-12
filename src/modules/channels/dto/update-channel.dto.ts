@@ -13,3 +13,8 @@ export class UpdateChannelDto {
   @IsOptional()
   displayName?: string;
 }
+
+export class UpdateChannelDtoWithMeta extends UpdateChannelDto {
+  @IsString()
+  userId: string;
+}

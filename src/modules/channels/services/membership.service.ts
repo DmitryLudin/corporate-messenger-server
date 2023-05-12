@@ -14,7 +14,7 @@ export class ChannelsMembershipService {
     private readonly unreadChannelsService: UnreadChannelsService,
   ) {}
 
-  async createMultiple(
+  async addMembers(
     channelId: string,
     { userIds, namespaceId }: AddChannelMembersWithNamespaceDto,
     transactionManager?: EntityManager,

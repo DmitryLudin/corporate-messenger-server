@@ -71,22 +71,27 @@ export class ChannelsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':channelId')
-  async getById(
-    @Param('channelId') channelId: string,
+  @Get(':channelName')
+  async getByName(
+    @Param('namespaceId') namespaceId: string,
+    @Param('channelName') channelName: string,
     @Req() { user }: RequestWithUser,
   ) {
-    return this.channelsService.getChannelWithLastReadTimestamp(
-      channelId,
-      user.id,
-    );
+    return this.channelsService.getByName(namespaceId, channelName, user.id);
   }
 
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   @Patch(':channelId')
-  async update(@Param('channelId') id: string, @Body() data: UpdateChannelDto) {
-    const channel = await this.channelsService.update(id, data);
+  async update(
+    @Param('channelId') id: string,
+    @Body() data: UpdateChannelDto,
+    @Req() { user }: RequestWithUser,
+  ) {
+    const channel = await this.channelsService.update(id, {
+      ...data,
+      userId: user.id,
+    });
     this.channelsGateway.emitUpdatedChannel(channel);
     return channel;
   }
@@ -119,7 +124,7 @@ export class ChannelsController {
     @Param('channelId') channelId: string,
     @Body() data: AddChannelMembersDto,
   ) {
-    await this.channelsMembershipService.createMultiple(channelId, {
+    await this.channelsMembershipService.addMembers(channelId, {
       ...data,
       namespaceId,
     });

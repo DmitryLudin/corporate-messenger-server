@@ -4,6 +4,7 @@ import { ChannelsModule } from 'src/modules/channels/channels.module';
 import { NamespaceMember } from 'src/modules/namespaces/entities/namespace-member.entity';
 import { Namespace } from 'src/modules/namespaces/entities/namespace.entity';
 import { CreateNamespaceTransaction } from 'src/modules/namespaces/transactions/create-namespace.transaction';
+import { JoinNamespaceTransaction } from 'src/modules/namespaces/transactions/join-namespace.transaction';
 import { NamespacesService } from './namespaces.service';
 import { NamespacesController } from './namespaces.controller';
 import { NamespaceMembersService } from './services/members.service';
@@ -16,6 +17,7 @@ import { NamespaceMembersService } from './services/members.service';
   controllers: [NamespacesController],
   providers: [
     CreateNamespaceTransaction,
+    JoinNamespaceTransaction,
     NamespacesService,
     NamespaceMembersService,
   ],

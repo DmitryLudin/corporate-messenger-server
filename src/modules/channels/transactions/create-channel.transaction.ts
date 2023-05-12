@@ -8,7 +8,7 @@ import { ChannelsMembershipService } from 'src/modules/channels/services/members
 import { DataSource, EntityManager, Repository } from 'typeorm';
 
 @Injectable()
-export class ChannelCreationTransaction extends BaseTransaction<
+export class CreateChannelTransaction extends BaseTransaction<
   CreateChannelWithMetaDto,
   Channel
 > {
@@ -35,7 +35,7 @@ export class ChannelCreationTransaction extends BaseTransaction<
     }
 
     await Promise.all([
-      this.channelsMembershipService.createMultiple(
+      this.channelsMembershipService.addMembers(
         channel.id,
         { userIds, namespaceId: others.namespaceId },
         manager,

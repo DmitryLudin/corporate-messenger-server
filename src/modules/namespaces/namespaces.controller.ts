@@ -3,18 +3,16 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/modules/auth/guards';
 import { RequestWithUser } from 'src/modules/auth/types';
+import { JoinNamespaceDto } from 'src/modules/namespaces/dto/join-namespace.dto';
 import { NamespaceMembersService } from 'src/modules/namespaces/services/members.service';
 import { NamespacesService } from './namespaces.service';
 import { CreateNamespaceDto } from './dto/create-namespace.dto';
-import { UpdateNamespaceDto } from './dto/update-namespace.dto';
 
 @Controller()
 export class NamespacesController {
@@ -24,7 +22,7 @@ export class NamespacesController {
   ) {}
 
   @UseGuards(JwtAuthGuard)
-  @Post()
+  @Post('create')
   create(
     @Req() request: RequestWithUser,
     @Body() createNamespaceDto: CreateNamespaceDto,
@@ -36,29 +34,25 @@ export class NamespacesController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get()
+  @Get('me')
   findAllForUser(@Req() { user }: RequestWithUser) {
     return this.namespaceMembersService.findAllForUser(user.id);
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post('join')
+  async join(@Req() { user }: RequestWithUser, @Body() data: JoinNamespaceDto) {
+    return this.namespacesService.join(data.namespaceName, user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':name')
-  findOne(@Param('name') name: string) {
-    return this.namespacesService.findByName(name);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateNamespaceDto: UpdateNamespaceDto,
+  async findByName(
+    @Req() { user }: RequestWithUser,
+    @Param('name') name: string,
   ) {
-    return this.namespacesService.update(id, updateNamespaceDto);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.namespacesService.remove(id);
+    const namespace = await this.namespacesService.findByName(name);
+    await this.namespaceMembersService.findById(namespace.id, user.id);
+    return namespace;
   }
 }

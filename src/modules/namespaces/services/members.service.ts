@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NamespaceMember } from 'src/modules/namespaces/entities/namespace-member.entity';
 import { EntityManager, Repository } from 'typeorm';
@@ -10,7 +10,7 @@ export class NamespaceMembersService {
     private namespaceMemberRepository: Repository<NamespaceMember>,
   ) {}
 
-  async create(
+  async addMember(
     namespaceId: string,
     userId: string,
     transactionManager?: EntityManager,
@@ -18,6 +18,21 @@ export class NamespaceMembersService {
     const repository = this.getRepository(transactionManager);
     const member = repository.create({ namespaceId, userId });
     return repository.insert(member);
+  }
+
+  async findById(namespaceId: string, userId: string) {
+    const namespaceMembership = await this.namespaceMemberRepository.findOne({
+      where: { namespaceId, userId },
+    });
+
+    if (!namespaceMembership) {
+      throw new HttpException(
+        'Пользователь не является участником данного пространства',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return namespaceMembership;
   }
 
   async findAllForUser(userId: string) {

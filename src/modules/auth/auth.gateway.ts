@@ -12,14 +12,18 @@ export class AuthGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly authService: AuthService) {}
 
   async handleConnection(client: Socket) {
-    const user = await this.authService.getUserFromSocket(client);
-    console.log(
-      'user connected',
-      user.displayName,
-      client.id,
-      client.rooms.size,
-    );
-    client.join(user.id);
+    try {
+      const user = await this.authService.getUserFromSocket(client);
+      console.log(
+        'user connected',
+        user.displayName,
+        client.id,
+        client.rooms.size,
+      );
+      client.join(user.id);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   handleDisconnect(client: Socket) {
