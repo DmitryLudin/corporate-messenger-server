@@ -11,6 +11,7 @@ import { RedisClientOptions } from 'redis';
       inject: [ConfigService],
       isGlobal: true,
       useFactory: (configService: ConfigService) => ({
+        ttl: 86400 * 1000, // Время кэша 1 сутки
         store: redisStore,
         url: `redis://${configService.get('REDIS_HOST')}:${configService.get(
           'REDIS_PORT',

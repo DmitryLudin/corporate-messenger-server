@@ -9,7 +9,6 @@ import { ChannelsMembershipService } from 'src/modules/channels/services/members
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
 import { SyncUnreadChannelsService } from 'src/modules/channels/services/sync-unread-channels.service';
 import { CreateChannelTransaction } from 'src/modules/channels/transactions/create-channel.transaction';
-import { UsersModule } from 'src/modules/users/users.module';
 import { ChannelsService } from './channels.service';
 import { ChannelsController } from './channels.controller';
 import { ChannelsGateway } from './channels.gateway';
@@ -24,7 +23,6 @@ import { UnreadChannelsService } from 'src/modules/channels/services/unread-chan
       UserChannelStatus,
     ]),
     AuthModule,
-    UsersModule,
   ],
   providers: [
     SyncUnreadChannelsService,
@@ -41,6 +39,7 @@ import { UnreadChannelsService } from 'src/modules/channels/services/unread-chan
     ChannelsMembershipService,
     CreateChannelTransaction,
     ChannelsGateway,
+    UnreadChannelsService,
   ],
 })
 export class ChannelsModule {}

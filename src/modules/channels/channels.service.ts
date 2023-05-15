@@ -1,10 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
-import { ChannelsGateway } from 'src/modules/channels/channels.gateway';
 import { CreateChannelWithMetaDto } from 'src/modules/channels/dto/create-channel.dto';
 import { UpdateChannelDtoWithMeta } from 'src/modules/channels/dto/update-channel.dto';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
+import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
 import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
 import { CreateChannelTransaction } from 'src/modules/channels/transactions/create-channel.transaction';
 import { Repository } from 'typeorm';
@@ -16,8 +16,19 @@ export class ChannelsService {
     private channelsRepository: Repository<Channel>,
     private readonly createChannelTransaction: CreateChannelTransaction,
     private readonly unreadChannelsService: UnreadChannelsService,
-    private readonly channelsGateway: ChannelsGateway,
+    private readonly channelsMembershipService: ChannelsMembershipService,
   ) {}
+
+  async getById(id: string): Promise<Channel | null> {
+    return await this.channelsRepository.findOne({ where: { id } });
+  }
+
+  async getByName(options: {
+    name: string;
+    namespaceId: string;
+  }): Promise<Channel | null> {
+    return await this.channelsRepository.findOne({ where: options });
+  }
 
   async findAll(namespaceId: string, options: IPaginationOptions) {
     return paginate(this.channelsRepository, options, {
@@ -26,7 +37,7 @@ export class ChannelsService {
   }
 
   async findById(id: string, userId: string) {
-    const channel = await this.channelsRepository.findOne({ where: { id } });
+    const channel = await this.getById(id);
 
     if (!channel) {
       throw new HttpException(
@@ -45,9 +56,7 @@ export class ChannelsService {
   }
 
   async findByName(namespaceId: string, channelName: string, userId: string) {
-    const channel = await this.channelsRepository.findOne({
-      where: { namespaceId, name: channelName },
-    });
+    const channel = await this.getByName({ name: channelName, namespaceId });
 
     if (!channel) {
       throw new HttpException(
@@ -56,12 +65,15 @@ export class ChannelsService {
       );
     }
 
-    const lastReadTimestamp =
-      await this.unreadChannelsService.getLastReadTimestamp(userId, channel.id);
+    const [lastReadTimestamp, members] = await Promise.all([
+      this.unreadChannelsService.getLastReadTimestamp(userId, channel.id),
+      this.channelsMembershipService.findAllChannelMembership(channel.id),
+    ]);
 
     return {
       ...channel,
       lastReadTimestamp,
+      membersCount: members?.length || 0,
     };
   }
 

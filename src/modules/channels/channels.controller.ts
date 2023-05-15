@@ -123,7 +123,7 @@ export class ChannelsController {
       ...data,
       namespaceId,
     });
-    return this.channelsGateway.emitNewChannelMembers(channelId, data);
+    return this.channelsGateway.emitNewChannelMembers(channelId);
   }
 
   @HttpCode(200)
@@ -133,8 +133,8 @@ export class ChannelsController {
     @Param('channelId') channelId: string,
     @Body() data: RemoveChannelMemberDto,
   ) {
-    await this.channelsMembershipService.remove(channelId, data.userId);
-    return this.channelsGateway.emitRemovedChannelMember(channelId, data);
+    await this.channelsMembershipService.removeMember(channelId, data.userId);
+    return this.channelsGateway.emitRemovedChannelMember(channelId);
   }
 
   @UseGuards(JwtAuthGuard)

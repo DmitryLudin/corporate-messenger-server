@@ -75,7 +75,7 @@ export class ChannelsMembershipService {
     };
   }
 
-  async remove(channelId: string, userId: string) {
+  async removeMember(channelId: string, userId: string) {
     return await this.channelMembersRepository.delete({ userId, channelId });
   }
 

@@ -15,11 +15,6 @@ export class NamespacesService {
     private readonly joinNamespaceTransaction: JoinNamespaceTransaction,
   ) {}
 
-  async create(dto: CreateNamespaceWithUserIdDto) {
-    const namespace = await this.createNamespaceTransaction.run(dto);
-    return this.findById(namespace.id);
-  }
-
   async findById(id: string) {
     const namespace = await this.namespaceRepository.findOne({ where: { id } });
 
@@ -46,6 +41,11 @@ export class NamespacesService {
     }
 
     return namespace;
+  }
+
+  async create(dto: CreateNamespaceWithUserIdDto) {
+    const namespace = await this.createNamespaceTransaction.run(dto);
+    return this.findById(namespace.id);
   }
 
   async join(namespaceName: string, userId: string) {

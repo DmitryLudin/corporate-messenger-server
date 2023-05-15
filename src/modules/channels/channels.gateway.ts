@@ -14,9 +14,7 @@ import { Server, Socket } from 'socket.io';
 import { cors } from 'src/const/cors';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { ChannelsEventEnum } from 'src/modules/channels/const/channels-event.enum';
-import { AddChannelMembersDto } from 'src/modules/channels/dto/add-channel-members.dto';
 import { CreateChannelMessageDto } from 'src/modules/channels/dto/create-message.dto';
-import { RemoveChannelMemberDto } from 'src/modules/channels/dto/remove-channel-member.dto';
 import { RemoveChannelMessageDto } from 'src/modules/channels/dto/remove-message.dto';
 import { UnreadChannelTimestampDto } from 'src/modules/channels/dto/unread-timestamp.dto';
 import { UpdateChannelMessageDto } from 'src/modules/channels/dto/update-message.dto';
@@ -25,7 +23,6 @@ import { Channel } from 'src/modules/channels/entities/channel.entity';
 import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
 import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
-import { UsersService } from 'src/modules/users/users.service';
 
 @WebSocketGateway({ cors, namespace: 'channels' })
 export class ChannelsGateway
@@ -38,7 +35,6 @@ export class ChannelsGateway
     private readonly channelsMembershipService: ChannelsMembershipService,
     private readonly channelMessagesService: ChannelMessagesService,
     private readonly unreadChannelsService: UnreadChannelsService,
-    private readonly usersService: UsersService,
     private readonly authService: AuthService,
   ) {}
 
@@ -64,20 +60,21 @@ export class ChannelsGateway
     });
   }
 
-  async emitNewChannelMembers(channelId: string, data: AddChannelMembersDto) {
-    const users = await this.usersService.getByIds(data.userIds);
+  async emitNewChannelMembers(channelId: string) {
+    const members =
+      await this.channelsMembershipService.findAllChannelMembership(channelId);
     this.server.to(channelId).emit(ChannelsEventEnum.MEMBERS_ADDED, {
-      users: this.deserializeData(users),
+      channelId,
+      membersCount: members?.length || 0,
     });
   }
 
-  async emitRemovedChannelMember(
-    channelId: string,
-    data: RemoveChannelMemberDto,
-  ) {
-    const user = await this.usersService.getById(data.userId);
+  async emitRemovedChannelMember(channelId: string) {
+    const members =
+      await this.channelsMembershipService.findAllChannelMembership(channelId);
     this.server.to(channelId).emit(ChannelsEventEnum.MEMBER_REMOVED, {
-      users: this.deserializeData(user),
+      channelId,
+      membersCount: members?.length || 0,
     });
   }
 

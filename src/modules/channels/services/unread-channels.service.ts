@@ -34,10 +34,11 @@ export class UnreadChannelsService {
   }: UnreadChannelTimestampDto): Promise<void> {
     // Сохраняем время последнего прочитанного сообщения
     const lastReadKey = `channelLastRead:${userId}:${channelId}`;
-    const lastMessage = await this.messagesService.findLastMessage(channelId);
     await this.cacheManager.set(lastReadKey, timestamp);
 
-    if (lastMessage.timestamp === timestamp) {
+    const lastMessage = await this.messagesService.findLastMessage(channelId);
+
+    if (lastMessage?.timestamp === timestamp) {
       // Удаляем метку непрочитанного канала
       await this.cacheManager.del(`channelUnread:${userId}:${channelId}`);
     }
