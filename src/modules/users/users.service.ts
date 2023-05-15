@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from 'src/modules/users/dto';
 import { User } from 'src/modules/users/user.entity';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -23,10 +23,6 @@ export class UsersService {
     }
 
     return user;
-  }
-
-  async getByIds(ids: string[]) {
-    return this.usersRepository.find({ where: { id: In(ids) } });
   }
 
   async getByUsername(username: string) {

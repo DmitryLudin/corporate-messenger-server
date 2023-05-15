@@ -14,12 +14,12 @@ import { NamespacesModule } from './namespaces/namespaces.module';
     ConfigModule.forRoot({
       validationSchema: configSchema,
     }),
-    AuthModule,
     DatabaseModule,
-    UsersModule,
-    ChannelsModule,
     GlobalCacheModule,
+    AuthModule,
+    UsersModule,
     NamespacesModule,
+    ChannelsModule,
     RouterModule.register([
       {
         path: 'namespaces',

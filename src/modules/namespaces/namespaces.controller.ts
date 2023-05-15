@@ -24,12 +24,12 @@ export class NamespacesController {
   @UseGuards(JwtAuthGuard)
   @Post('create')
   create(
-    @Req() request: RequestWithUser,
+    @Req() { user }: RequestWithUser,
     @Body() createNamespaceDto: CreateNamespaceDto,
   ) {
     return this.namespacesService.create({
       ...createNamespaceDto,
-      userId: request.user.id,
+      userId: user.id,
     });
   }
 

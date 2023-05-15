@@ -36,13 +36,13 @@ export class NamespaceMembersService {
   }
 
   async findAllForUser(userId: string) {
-    const channelsMembership = await this.namespaceMemberRepository.find({
+    const namespaceMembership = await this.namespaceMemberRepository.find({
       where: { userId },
       relations: ['namespace'],
       select: ['namespace'],
     });
 
-    return channelsMembership.map((membership) => membership.namespace);
+    return namespaceMembership.map((membership) => membership.namespace);
   }
 
   private getRepository(transactionManager?: EntityManager) {

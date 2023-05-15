@@ -44,23 +44,6 @@ export class ChannelsController {
     return this.channelsService.findAll(namespaceId, options);
   }
 
-  @HttpCode(200)
-  @UseGuards(JwtAuthGuard)
-  @Post('create')
-  async create(
-    @Param('namespaceId') namespaceId: string,
-    @Req() { user }: RequestWithUser,
-    @Body() data: CreateChannelDto,
-  ) {
-    const channel = await this.channelsService.create({
-      ...data,
-      namespaceId,
-      userId: user.id,
-    });
-    this.channelsGateway.emitNewChannel(channel, data.members);
-    return channel;
-  }
-
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getAllUserChannels(
@@ -81,6 +64,23 @@ export class ChannelsController {
     @Req() { user }: RequestWithUser,
   ) {
     return this.channelsService.findByName(namespaceId, channelName, user.id);
+  }
+
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  @Post('create')
+  async create(
+    @Param('namespaceId') namespaceId: string,
+    @Req() { user }: RequestWithUser,
+    @Body() data: CreateChannelDto,
+  ) {
+    const channel = await this.channelsService.create({
+      ...data,
+      namespaceId,
+      userId: user.id,
+    });
+    this.channelsGateway.emitNewChannel(channel, data.members);
+    return channel;
   }
 
   @HttpCode(200)

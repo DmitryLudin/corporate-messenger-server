@@ -1,4 +1,5 @@
-import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
@@ -41,7 +42,7 @@ export class SyncUnreadChannelsService {
             userId,
             channelId,
             isUnread: isUnreadChannelCache,
-            lastRead,
+            lastReadTimestamp: lastRead,
           }),
         );
       } else if (!isUnreadChannelCache && userChannelStatus) {
@@ -52,7 +53,7 @@ export class SyncUnreadChannelsService {
         ]);
       } else if (isUnreadChannelCache && userChannelStatus) {
         userChannelStatus.isUnread = isUnreadChannelCache;
-        userChannelStatus.lastRead = lastRead;
+        userChannelStatus.lastReadTimestamp = lastRead;
         allChannelsStatuses.push(userChannelStatus);
       }
     }

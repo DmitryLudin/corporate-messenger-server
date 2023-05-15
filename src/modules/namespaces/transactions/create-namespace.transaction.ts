@@ -20,11 +20,11 @@ export class CreateNamespaceTransaction extends BaseTransaction<
   }
 
   protected async execute(
-    { userId, ...other }: CreateNamespaceWithUserIdDto,
+    { userId, displayName, name }: CreateNamespaceWithUserIdDto,
     manager: EntityManager,
   ): Promise<Namespace> {
     const namespace = await manager.save<Namespace>(
-      manager.create<Namespace>(Namespace, other),
+      manager.create<Namespace>(Namespace, { displayName, name }),
     );
 
     try {

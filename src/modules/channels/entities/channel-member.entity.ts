@@ -32,4 +32,7 @@ export class ChannelMember {
   @Column()
   @Exclude()
   userId: string;
+
+  @Column({ default: false })
+  isAdmin: boolean;
 }

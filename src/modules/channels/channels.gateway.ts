@@ -11,7 +11,7 @@ import {
 } from '@nestjs/websockets';
 import { instanceToPlain } from 'class-transformer';
 import { Server, Socket } from 'socket.io';
-import { cors } from 'src/const/cors';
+import { wsConfig } from 'src/const/websocket';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { ChannelsEventEnum } from 'src/modules/channels/const/channels-event.enum';
 import { CreateChannelMessageDto } from 'src/modules/channels/dto/create-message.dto';
@@ -24,7 +24,7 @@ import { ChannelsMembershipService } from 'src/modules/channels/services/members
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
 import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
 
-@WebSocketGateway({ cors, namespace: 'channels', transports: ['websocket'] })
+@WebSocketGateway({ ...wsConfig, namespace: 'channels' })
 export class ChannelsGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
