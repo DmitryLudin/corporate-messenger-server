@@ -2,6 +2,7 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { createAdapter } from '@socket.io/redis-streams-adapter';
 import { ServerOptions } from 'socket.io';
 import { createClient } from 'redis';
+import { TemplatedApp, App } from 'uWebSockets.js';
 
 type TConnectRedisOptions = {
   host: string;
@@ -19,6 +20,8 @@ export class RedisIoAdapter extends IoAdapter {
 
   createIOServer(port: number, options?: ServerOptions): any {
     const server = super.createIOServer(port, options);
+    const uwsApp: TemplatedApp = App();
+    server.attachApp(uwsApp);
     server.adapter(this.adapterConstructor);
     return server;
   }

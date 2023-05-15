@@ -57,7 +57,8 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "socket.io": "^4.6.1",
-    "typeorm": "^0.3.16"
+    "typeorm": "^0.3.16",
+    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.24.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.6.3",
