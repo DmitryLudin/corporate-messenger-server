@@ -7,6 +7,7 @@ import {
 } from '@nestjs/platform-fastify';
 import fastifyCors from '@fastify/cors';
 import { cors } from 'src/const/cors';
+import { RedisIoAdapter } from 'src/core/adapters/redis-io.adapter';
 import { AppModule } from 'src/modules/app.module';
 import helmet from '@fastify/helmet';
 import fastifyCookie from '@fastify/cookie';
@@ -30,6 +31,14 @@ async function bootstrap() {
       forbidUnknownValues: true,
     }),
   );
+
+  /* Redis adapter */
+  const redisIoAdapter = new RedisIoAdapter(app);
+  await redisIoAdapter.connectToRedis({
+    host: configService.get('REDIS_HOST'),
+    port: configService.get('REDIS_PORT'),
+  });
+  app.useWebSocketAdapter(redisIoAdapter);
 
   await app.listen(configService.get('PORT') || 3000);
 }

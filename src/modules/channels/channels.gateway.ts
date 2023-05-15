@@ -24,7 +24,7 @@ import { ChannelsMembershipService } from 'src/modules/channels/services/members
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
 import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
 
-@WebSocketGateway({ cors, namespace: 'channels' })
+@WebSocketGateway({ cors, namespace: 'channels', transports: ['websocket'] })
 export class ChannelsGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
