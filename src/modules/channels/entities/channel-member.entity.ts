@@ -17,7 +17,9 @@ export class ChannelMember {
   @Column()
   namespaceId: string;
 
-  @ManyToOne(() => Channel, { onDelete: 'CASCADE', cascade: true })
+  @ManyToOne(() => Channel, (channel) => channel.members, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'channelId' })
   channel: Channel;
 
@@ -25,7 +27,7 @@ export class ChannelMember {
   @Exclude()
   channelId: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE', eager: true })
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 

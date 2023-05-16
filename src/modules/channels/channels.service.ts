@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
 import { CreateChannelWithMetaDto } from 'src/modules/channels/dto/create-channel.dto';
 import { UpdateChannelDtoWithMeta } from 'src/modules/channels/dto/update-channel.dto';
+import { ChannelMember } from 'src/modules/channels/entities/channel-member.entity';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
 import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
 import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
@@ -14,6 +15,8 @@ export class ChannelsService {
   constructor(
     @InjectRepository(Channel)
     private channelsRepository: Repository<Channel>,
+    @InjectRepository(ChannelMember)
+    private channelMembersRepository: Repository<ChannelMember>,
     private readonly createChannelTransaction: CreateChannelTransaction,
     private readonly unreadChannelsService: UnreadChannelsService,
     private readonly channelsMembershipService: ChannelsMembershipService,
@@ -33,6 +36,29 @@ export class ChannelsService {
   async findAll(namespaceId: string, options: IPaginationOptions) {
     return paginate(this.channelsRepository, options, {
       where: { namespaceId },
+    });
+  }
+
+  async findAllUserChannelsWithReadStatuses({
+    userId,
+    namespaceId,
+  }: {
+    userId: string;
+    namespaceId: string;
+  }) {
+    const channels = await this.channelsRepository.find({
+      relations: {
+        members: true,
+        statuses: true,
+      },
+      where: { namespaceId, members: { userId } },
+    });
+
+    return channels.map((channel) => {
+      return {
+        ...channel,
+        isUnread: channel.statuses[0]?.isUnread || false,
+      };
     });
   }
 

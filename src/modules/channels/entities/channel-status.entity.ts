@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class UserChannelStatus {
+export class ChannelStatus {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -20,7 +20,10 @@ export class UserChannelStatus {
   @Column({ nullable: true })
   lastReadTimestamp?: number;
 
-  @ManyToOne(() => Channel, { onDelete: 'CASCADE', cascade: true })
+  @ManyToOne(() => Channel, (channel) => channel.statuses, {
+    onDelete: 'CASCADE',
+    cascade: true,
+  })
   @JoinColumn({ name: 'channelId' })
   channel: Channel;
 

@@ -14,7 +14,10 @@ export class NamespaceMember {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Namespace, { onDelete: 'CASCADE', cascade: true })
+  @ManyToOne(() => Namespace, (namespace) => namespace.members, {
+    onDelete: 'CASCADE',
+    cascade: true,
+  })
   @JoinColumn({ name: 'namespaceId' })
   namespace: Namespace;
 
@@ -22,7 +25,10 @@ export class NamespaceMember {
   @Exclude()
   namespaceId: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE', eager: true })
+  @ManyToOne(() => User, {
+    onDelete: 'CASCADE',
+    cascade: true,
+  })
   @JoinColumn({ name: 'userId' })
   user: User;
 

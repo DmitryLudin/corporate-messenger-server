@@ -32,7 +32,6 @@ export class ChannelsMembershipService {
     const channelsMembership = await this.channelMembersRepository.find({
       where: { userId, namespaceId },
       relations: ['channel'],
-      select: ['channel'],
     });
 
     return Promise.all(

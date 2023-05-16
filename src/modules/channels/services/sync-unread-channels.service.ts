@@ -3,14 +3,14 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
-import { UserChannelStatus } from 'src/modules/channels/entities/user-channel-status.entity';
+import { ChannelStatus } from 'src/modules/channels/entities/channel-status.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
 export class SyncUnreadChannelsService {
   constructor(
-    @InjectRepository(UserChannelStatus)
-    private userChannelStatusRepository: Repository<UserChannelStatus>,
+    @InjectRepository(ChannelStatus)
+    private userChannelStatusRepository: Repository<ChannelStatus>,
     @Inject(CACHE_MANAGER)
     private cacheManager: Cache,
   ) {}

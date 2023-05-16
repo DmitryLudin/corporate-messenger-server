@@ -50,10 +50,10 @@ export class ChannelsController {
     @Param('namespaceId') namespaceId: string,
     @Req() { user }: RequestWithUser,
   ) {
-    return this.channelsMembershipService.findAllUserChannels(
-      user.id,
+    return this.channelsService.findAllUserChannelsWithReadStatuses({
+      userId: user.id,
       namespaceId,
-    );
+    });
   }
 
   @UseGuards(JwtAuthGuard)
