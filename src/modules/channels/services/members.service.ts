@@ -3,15 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
 import { AddChannelMembersWithNamespaceDto } from 'src/modules/channels/dto/add-channel-members.dto';
 import { ChannelMember } from 'src/modules/channels/entities/channel-member.entity';
-import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
 import { EntityManager, Repository } from 'typeorm';
 
 @Injectable()
-export class ChannelsMembershipService {
+export class ChannelMembersService {
   constructor(
     @InjectRepository(ChannelMember)
     private channelMembersRepository: Repository<ChannelMember>,
-    private readonly unreadChannelsService: UnreadChannelsService,
   ) {}
 
   async addMembers(
@@ -28,32 +26,9 @@ export class ChannelsMembershipService {
     return await repository.insert(members);
   }
 
-  async findAllUserChannels(userId: string, namespaceId: string) {
-    const channelsMembership = await this.channelMembersRepository.find({
-      where: { userId, namespaceId },
-      relations: ['channel'],
-    });
-
-    return Promise.all(
-      channelsMembership.map(async (membership) => {
-        const isUnreadChannel = await this.unreadChannelsService.isUnread(
-          userId,
-          membership.channelId,
-        );
-
-        return {
-          ...membership.channel,
-          isUnread: isUnreadChannel,
-        };
-      }),
-    );
-  }
-
-  async findAllChannelMembership(channelId: string) {
-    return await this.channelMembersRepository.find({
-      where: { channelId },
-      relations: ['user'],
-      select: ['user'],
+  async getMembersCount(channelId: string) {
+    return await this.channelMembersRepository.countBy({
+      channelId,
     });
   }
 

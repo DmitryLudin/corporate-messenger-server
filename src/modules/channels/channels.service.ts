@@ -3,10 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
 import { CreateChannelWithMetaDto } from 'src/modules/channels/dto/create-channel.dto';
 import { UpdateChannelDtoWithMeta } from 'src/modules/channels/dto/update-channel.dto';
-import { ChannelMember } from 'src/modules/channels/entities/channel-member.entity';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
-import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
-import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
 import { CreateChannelTransaction } from 'src/modules/channels/transactions/create-channel.transaction';
 import { Repository } from 'typeorm';
 
@@ -14,12 +11,8 @@ import { Repository } from 'typeorm';
 export class ChannelsService {
   constructor(
     @InjectRepository(Channel)
-    private channelsRepository: Repository<Channel>,
-    @InjectRepository(ChannelMember)
-    private channelMembersRepository: Repository<ChannelMember>,
+    private readonly channelsRepository: Repository<Channel>,
     private readonly createChannelTransaction: CreateChannelTransaction,
-    private readonly unreadChannelsService: UnreadChannelsService,
-    private readonly channelsMembershipService: ChannelsMembershipService,
   ) {}
 
   async getById(id: string): Promise<Channel | null> {
@@ -33,13 +26,20 @@ export class ChannelsService {
     return await this.channelsRepository.findOne({ where: options });
   }
 
+  async getUserChannelIds(userId: string, namespaceId: string) {
+    return await this.channelsRepository.find({
+      where: { namespaceId, members: { userId } },
+      select: { id: true },
+    });
+  }
+
   async findAll(namespaceId: string, options: IPaginationOptions) {
     return paginate(this.channelsRepository, options, {
       where: { namespaceId },
     });
   }
 
-  async findAllUserChannelsWithReadStatuses({
+  async findAllUserChannels({
     userId,
     namespaceId,
   }: {
@@ -47,42 +47,34 @@ export class ChannelsService {
     namespaceId: string;
   }) {
     const channels = await this.channelsRepository.find({
-      relations: {
-        members: true,
-        statuses: true,
-      },
-      where: { namespaceId, members: { userId } },
+      relations: { statuses: true },
+      where: { namespaceId, members: { userId }, statuses: { userId } },
+      select: { statuses: { isUnread: true } },
     });
 
     return channels.map((channel) => {
-      return {
-        ...channel,
-        isUnread: channel.statuses[0]?.isUnread || false,
-      };
+      channel.isUnread = channel.statuses[0]?.isUnread || false;
+      return channel;
     });
   }
 
-  async findById(id: string, userId: string) {
-    const channel = await this.getById(id);
-
-    if (!channel) {
-      throw new HttpException(
-        'Такого канала не существует',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    const lastReadTimestamp =
-      await this.unreadChannelsService.getLastReadTimestamp(userId, channel.id);
-
-    return {
-      ...channel,
-      lastReadTimestamp,
-    };
-  }
-
   async findByName(namespaceId: string, channelName: string, userId: string) {
-    const channel = await this.getByName({ name: channelName, namespaceId });
+    const channel = await this.channelsRepository
+      .createQueryBuilder('channel')
+      .leftJoin('channel.members', 'members')
+      .leftJoin('channel.statuses', 'statuses', 'statuses.userId = :userId', {
+        userId,
+      })
+      .select('channel.*')
+      .addSelect('COUNT(members)::int', 'membersCount')
+      .addSelect('statuses.lastReadTimestamp', 'lastReadTimestamp')
+      .where('channel.name = :channelName', { channelName })
+      .andWhere('channel.namespaceId = :namespaceId', {
+        namespaceId,
+      })
+      .groupBy('channel.id')
+      .addGroupBy('statuses.lastReadTimestamp')
+      .getRawOne();
 
     if (!channel) {
       throw new HttpException(
@@ -91,21 +83,36 @@ export class ChannelsService {
       );
     }
 
-    const [lastReadTimestamp, members] = await Promise.all([
-      this.unreadChannelsService.getLastReadTimestamp(userId, channel.id),
-      this.channelsMembershipService.findAllChannelMembership(channel.id),
-    ]);
+    return channel;
+  }
 
-    return {
-      ...channel,
-      lastReadTimestamp,
-      membersCount: members?.length || 0,
-    };
+  async findById(id: string, userId: string) {
+    const channel = await this.channelsRepository
+      .createQueryBuilder('channel')
+      .leftJoin('channel.members', 'members')
+      .leftJoin('channel.statuses', 'statuses', 'statuses.userId = :userId', {
+        userId,
+      })
+      .select('channel.*')
+      .addSelect('COUNT(members)::int', 'membersCount')
+      .addSelect('statuses.lastReadTimestamp', 'lastReadTimestamp')
+      .where('channel.id = :channelId', { channelId: id })
+      .groupBy('channel.id')
+      .addGroupBy('statuses.lastReadTimestamp')
+      .getRawOne();
+
+    if (!channel) {
+      throw new HttpException(
+        'Канала с таким ID не существует',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return channel;
   }
 
   async create(data: CreateChannelWithMetaDto): Promise<Channel> {
-    const channel = await this.createChannelTransaction.run(data);
-    return this.findById(channel.id, data.userId);
+    return await this.createChannelTransaction.run(data);
   }
 
   async update(

@@ -11,4 +11,7 @@ export class JoinNamespaceTransactionDto {
 
   @IsString()
   userId: string;
+
+  @IsString()
+  channelId: string;
 }

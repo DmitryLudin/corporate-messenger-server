@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/modules/auth/guards';
 import { RequestWithUser } from 'src/modules/auth/types';
+import { ChannelsGateway } from 'src/modules/channels/channels.gateway';
 import { JoinNamespaceDto } from 'src/modules/namespaces/dto/join-namespace.dto';
 import { CreateNamespaceDto } from './dto/create-namespace.dto';
 import { NamespacesService } from './namespaces.service';
@@ -18,7 +19,10 @@ import { NamespacesService } from './namespaces.service';
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)
 export class NamespacesController {
-  constructor(private readonly namespacesService: NamespacesService) {}
+  constructor(
+    private readonly namespacesService: NamespacesService,
+    private readonly channelsGateway: ChannelsGateway,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
@@ -50,6 +54,11 @@ export class NamespacesController {
   @UseGuards(JwtAuthGuard)
   @Post('join')
   async join(@Req() { user }: RequestWithUser, @Body() data: JoinNamespaceDto) {
-    return this.namespacesService.join(data.namespaceName, user.id);
+    const { namespace, channel } = await this.namespacesService.join(
+      data.namespaceName,
+      user.id,
+    );
+    await this.channelsGateway.emitChannelMembersCount(channel.id);
+    return namespace;
   }
 }

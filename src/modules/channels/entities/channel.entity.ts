@@ -43,4 +43,8 @@ export class Channel {
   @OneToMany(() => ChannelStatus, (channelStatus) => channelStatus.channel)
   @Exclude()
   statuses: ChannelStatus[];
+
+  isUnread?: boolean;
+  lastReadTimestamp?: number;
+  membersCount?: number;
 }

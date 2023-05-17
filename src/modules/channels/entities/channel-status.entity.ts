@@ -14,11 +14,11 @@ export class ChannelStatus {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ default: false })
+  @Column({ default: false, type: 'boolean' })
   isUnread: boolean;
 
-  @Column({ nullable: true })
-  lastReadTimestamp?: number;
+  @Column({ type: 'bigint' })
+  lastReadTimestamp: number;
 
   @ManyToOne(() => Channel, (channel) => channel.statuses, {
     onDelete: 'CASCADE',
@@ -31,7 +31,7 @@ export class ChannelStatus {
   @Exclude()
   channelId: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE', eager: true })
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 

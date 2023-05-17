@@ -5,14 +5,14 @@ import { ChannelMember } from 'src/modules/channels/entities/channel-member.enti
 import { ChannelMessage } from 'src/modules/channels/entities/channel-message.entity';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
 import { ChannelStatus } from 'src/modules/channels/entities/channel-status.entity';
-import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
+import { ChannelMembersService } from 'src/modules/channels/services/members.service';
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
-import { SyncUnreadChannelsService } from 'src/modules/channels/services/sync-unread-channels.service';
+import { ChannelStatusesService } from 'src/modules/channels/services/statuses.service';
+import { AddChannelMembersTransaction } from 'src/modules/channels/transactions/add-members.transaction';
 import { CreateChannelTransaction } from 'src/modules/channels/transactions/create-channel.transaction';
 import { ChannelsService } from './channels.service';
 import { ChannelsController } from './channels.controller';
 import { ChannelsGateway } from './channels.gateway';
-import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
 
 @Module({
   imports: [
@@ -25,21 +25,20 @@ import { UnreadChannelsService } from 'src/modules/channels/services/unread-chan
     AuthModule,
   ],
   providers: [
-    SyncUnreadChannelsService,
+    AddChannelMembersTransaction,
     CreateChannelTransaction,
-    ChannelsMembershipService,
+    ChannelStatusesService,
+    ChannelMembersService,
     ChannelMessagesService,
-    UnreadChannelsService,
     ChannelsService,
     ChannelsGateway,
   ],
   controllers: [ChannelsController],
   exports: [
     ChannelsService,
-    ChannelsMembershipService,
     CreateChannelTransaction,
+    AddChannelMembersTransaction,
     ChannelsGateway,
-    UnreadChannelsService,
   ],
 })
 export class ChannelsModule {}

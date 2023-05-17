@@ -42,6 +42,7 @@ export class CreateNamespaceTransaction extends BaseTransaction<
       ]);
     } catch (error) {
       console.log(error);
+      throw error;
     }
 
     return namespace;

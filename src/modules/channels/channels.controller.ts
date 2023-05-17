@@ -22,7 +22,7 @@ import { AddChannelMembersDto } from 'src/modules/channels/dto/add-channel-membe
 import { CreateChannelDto } from 'src/modules/channels/dto/create-channel.dto';
 import { RemoveChannelMemberDto } from 'src/modules/channels/dto/remove-channel-member.dto';
 import { UpdateChannelDto } from 'src/modules/channels/dto/update-channel.dto';
-import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
+import { ChannelMembersService } from 'src/modules/channels/services/members.service';
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
 
 @Controller('channels')
@@ -30,7 +30,7 @@ import { ChannelMessagesService } from 'src/modules/channels/services/messages.s
 export class ChannelsController {
   constructor(
     private readonly channelsService: ChannelsService,
-    private readonly channelsMembershipService: ChannelsMembershipService,
+    private readonly channelMembersService: ChannelMembersService,
     private readonly channelMessagesService: ChannelMessagesService,
     private readonly channelsGateway: ChannelsGateway,
   ) {}
@@ -50,7 +50,7 @@ export class ChannelsController {
     @Param('namespaceId') namespaceId: string,
     @Req() { user }: RequestWithUser,
   ) {
-    return this.channelsService.findAllUserChannelsWithReadStatuses({
+    return this.channelsService.findAllUserChannels({
       userId: user.id,
       namespaceId,
     });
@@ -99,17 +99,17 @@ export class ChannelsController {
     return channel;
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get(':channelId/members')
-  async getChannelMembers(
-    @Param('channelId') channelId: string,
-    @Query() options: IPaginationOptions,
-  ) {
-    return this.channelsMembershipService.findAllChannelMembers(
-      channelId,
-      options,
-    );
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Get(':channelId/members')
+  // async getChannelMembers(
+  //   @Param('channelId') channelId: string,
+  //   @Query() options: IPaginationOptions,
+  // ) {
+  //   return this.channelsMembershipService.findAllChannelMembers(
+  //     channelId,
+  //     options,
+  //   );
+  // }
 
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
@@ -119,11 +119,11 @@ export class ChannelsController {
     @Param('channelId') channelId: string,
     @Body() data: AddChannelMembersDto,
   ) {
-    await this.channelsMembershipService.addMembers(channelId, {
+    await this.channelMembersService.addMembers(channelId, {
       ...data,
       namespaceId,
     });
-    return this.channelsGateway.emitNewChannelMembers(channelId);
+    return this.channelsGateway.emitChannelMembersCount(channelId);
   }
 
   @HttpCode(200)
@@ -133,8 +133,8 @@ export class ChannelsController {
     @Param('channelId') channelId: string,
     @Body() data: RemoveChannelMemberDto,
   ) {
-    await this.channelsMembershipService.removeMember(channelId, data.userId);
-    return this.channelsGateway.emitRemovedChannelMember(channelId);
+    await this.channelMembersService.removeMember(channelId, data.userId);
+    return this.channelsGateway.emitChannelMembersCount(channelId);
   }
 
   @UseGuards(JwtAuthGuard)

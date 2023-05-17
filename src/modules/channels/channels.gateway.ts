@@ -13,6 +13,7 @@ import { instanceToPlain } from 'class-transformer';
 import { Server, Socket } from 'socket.io';
 import { wsConfig } from 'src/const/websocket';
 import { AuthService } from 'src/modules/auth/auth.service';
+import { ChannelsService } from 'src/modules/channels/channels.service';
 import { ChannelsEventEnum } from 'src/modules/channels/const/channels-event.enum';
 import { CreateChannelMessageDto } from 'src/modules/channels/dto/create-message.dto';
 import { RemoveChannelMessageDto } from 'src/modules/channels/dto/remove-message.dto';
@@ -20,9 +21,8 @@ import { UnreadChannelTimestampDto } from 'src/modules/channels/dto/unread-times
 import { UpdateChannelMessageDto } from 'src/modules/channels/dto/update-message.dto';
 import { ChannelMessage } from 'src/modules/channels/entities/channel-message.entity';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
-import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
+import { ChannelMembersService } from 'src/modules/channels/services/members.service';
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
-import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
 
 @WebSocketGateway({ ...wsConfig, namespace: 'channels' })
 export class ChannelsGateway
@@ -32,9 +32,9 @@ export class ChannelsGateway
   private readonly server: Server;
 
   constructor(
-    private readonly channelsMembershipService: ChannelsMembershipService,
+    private readonly channelsService: ChannelsService,
     private readonly channelMessagesService: ChannelMessagesService,
-    private readonly unreadChannelsService: UnreadChannelsService,
+    private readonly channelMembersService: ChannelMembersService,
     private readonly authService: AuthService,
   ) {}
 
@@ -60,21 +60,13 @@ export class ChannelsGateway
     });
   }
 
-  async emitNewChannelMembers(channelId: string) {
-    const members =
-      await this.channelsMembershipService.findAllChannelMembership(channelId);
-    this.server.to(channelId).emit(ChannelsEventEnum.MEMBERS_ADDED, {
+  async emitChannelMembersCount(channelId: string) {
+    const membersCount = await this.channelMembersService.getMembersCount(
       channelId,
-      membersCount: members?.length || 0,
-    });
-  }
-
-  async emitRemovedChannelMember(channelId: string) {
-    const members =
-      await this.channelsMembershipService.findAllChannelMembership(channelId);
-    this.server.to(channelId).emit(ChannelsEventEnum.MEMBER_REMOVED, {
+    );
+    this.server.to(channelId).emit(ChannelsEventEnum.MEMBERS_COUNT, {
       channelId,
-      membersCount: members?.length || 0,
+      membersCount,
     });
   }
 
@@ -85,7 +77,7 @@ export class ChannelsGateway
     @ConnectedSocket() client: Socket,
   ) {
     const user = await this.authService.getUserFromSocket(client);
-    const channels = await this.channelsMembershipService.findAllUserChannels(
+    const channels = await this.channelsService.getUserChannelIds(
       user.id,
       namespaceId,
     );
@@ -102,17 +94,15 @@ export class ChannelsGateway
 
     client.to(data.channelId).emit(ChannelsEventEnum.MESSAGE, message);
 
-    const memberships =
-      await this.channelsMembershipService.findAllChannelMembership(
-        data.channelId,
-      );
-
-    memberships.forEach(({ user }) => {
-      this.unreadChannelsService.markAsUnread(user.id, data.channelId);
-      client.to(user.id).emit(ChannelsEventEnum.UNREAD, {
-        channelId: data.channelId,
-      });
-    });
+    // const memberships =
+    //   await this.channelMembersService.findAllChannelMembership(data.channelId);
+    //
+    // memberships.forEach(({ user }) => {
+    //   // this.unreadChannelsService.markAsUnread(user.id, data.channelId);
+    //   client.to(user.id).emit(ChannelsEventEnum.UNREAD, {
+    //     channelId: data.channelId,
+    //   });
+    // });
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
@@ -151,7 +141,7 @@ export class ChannelsGateway
   async handleUpdateChannelTimestampEvent(
     @MessageBody() data: UnreadChannelTimestampDto,
   ) {
-    return this.unreadChannelsService.markAsRead(data);
+    // return this.unreadChannelsService.markAsRead(data);
   }
 
   private deserializeData<T extends object>(data: T): T {

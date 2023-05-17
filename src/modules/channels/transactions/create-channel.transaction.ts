@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BaseTransaction } from 'src/core/base-transaction';
 import { CreateChannelWithMetaDto } from 'src/modules/channels/dto/create-channel.dto';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
-import { ChannelsMembershipService } from 'src/modules/channels/services/membership.service';
-import { UnreadChannelsService } from 'src/modules/channels/services/unread-channels.service';
+import { AddChannelMembersTransaction } from 'src/modules/channels/transactions/add-members.transaction';
 import { DataSource, EntityManager } from 'typeorm';
 
 @Injectable()
@@ -13,8 +12,7 @@ export class CreateChannelTransaction extends BaseTransaction<
 > {
   constructor(
     dataSource: DataSource,
-    private readonly channelsMembershipService: ChannelsMembershipService,
-    private unreadChannelsService: UnreadChannelsService,
+    private readonly addChannelMembersTransaction: AddChannelMembersTransaction,
   ) {
     super(dataSource);
   }
@@ -32,18 +30,10 @@ export class CreateChannelTransaction extends BaseTransaction<
       userIds = userIds.concat(members);
     }
 
-    await Promise.all([
-      this.channelsMembershipService.addMembers(
-        channel.id,
-        { userIds, namespaceId: others.namespaceId },
-        manager,
-      ),
-      this.unreadChannelsService.markAsRead({
-        userId,
-        channelId: channel.id,
-        timestamp: channel.createdAt.getTime(),
-      }),
-    ]);
+    await this.addChannelMembersTransaction.runWithinTransaction(
+      { userIds, channelId: channel.id, namespaceId: others.namespaceId },
+      manager,
+    );
 
     return channel;
   }
