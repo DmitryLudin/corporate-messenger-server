@@ -4,6 +4,8 @@ import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
 import { CreateChannelWithMetaDto } from 'src/modules/channels/dto/create-channel.dto';
 import { UpdateChannelDtoWithMeta } from 'src/modules/channels/dto/update-channel.dto';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
+import { ChannelInfo } from 'src/modules/channels/models/channel.info';
+import { NavigationBarChannel } from 'src/modules/channels/models/navigation-bar.channel';
 import { CreateChannelTransaction } from 'src/modules/channels/transactions/create-channel.transaction';
 import { Repository } from 'typeorm';
 
@@ -45,7 +47,7 @@ export class ChannelsService {
   }: {
     userId: string;
     namespaceId: string;
-  }) {
+  }): Promise<NavigationBarChannel[]> {
     const channels = await this.channelsRepository.find({
       relations: { statuses: true },
       where: { namespaceId, members: { userId }, statuses: { userId } },
@@ -53,8 +55,10 @@ export class ChannelsService {
     });
 
     return channels.map((channel) => {
-      channel.isUnread = channel.statuses[0]?.isUnread || false;
-      return channel;
+      return new NavigationBarChannel({
+        ...channel,
+        isUnread: channel.statuses[0]?.isUnread || false,
+      });
     });
   }
 
@@ -83,7 +87,7 @@ export class ChannelsService {
       );
     }
 
-    return channel;
+    return new ChannelInfo(channel);
   }
 
   async findById(id: string, userId: string) {
@@ -108,7 +112,7 @@ export class ChannelsService {
       );
     }
 
-    return channel;
+    return new ChannelInfo(channel);
   }
 
   async create(data: CreateChannelWithMetaDto): Promise<Channel> {

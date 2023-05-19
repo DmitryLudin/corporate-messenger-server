@@ -22,6 +22,7 @@ import { AddChannelMembersDto } from 'src/modules/channels/dto/add-channel-membe
 import { CreateChannelDto } from 'src/modules/channels/dto/create-channel.dto';
 import { RemoveChannelMemberDto } from 'src/modules/channels/dto/remove-channel-member.dto';
 import { UpdateChannelDto } from 'src/modules/channels/dto/update-channel.dto';
+import { NavigationBarChannel } from 'src/modules/channels/models/navigation-bar.channel';
 import { ChannelMembersService } from 'src/modules/channels/services/members.service';
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
 
@@ -49,7 +50,7 @@ export class ChannelsController {
   async getAllUserChannels(
     @Param('namespaceId') namespaceId: string,
     @Req() { user }: RequestWithUser,
-  ) {
+  ): Promise<NavigationBarChannel[]> {
     return this.channelsService.findAllUserChannels({
       userId: user.id,
       namespaceId,
