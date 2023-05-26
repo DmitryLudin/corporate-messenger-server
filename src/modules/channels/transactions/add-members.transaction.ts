@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { BaseTransaction } from 'src/core/base-transaction';
-import { AddChannelMembersTransactionDto } from 'src/modules/channels/dto/add-channel-members.dto';
-import { ChannelMembersService } from 'src/modules/channels/services/members.service';
-import { ChannelStatusesService } from 'src/modules/channels/services/statuses.service';
+import { ChannelsService } from 'src/modules/channels/channels.service';
+import { AddChannelMembersTransactionDto } from 'src/modules/channels/dto';
+import {
+  ChannelMembersService,
+  ChannelStatusesService,
+} from 'src/modules/channels/services';
 import { DataSource, EntityManager } from 'typeorm';
 
 @Injectable()
@@ -12,6 +15,7 @@ export class AddChannelMembersTransaction extends BaseTransaction<
 > {
   constructor(
     dataSource: DataSource,
+    private readonly channelsService: ChannelsService,
     private readonly channelMembersService: ChannelMembersService,
     private readonly channelStatusesService: ChannelStatusesService,
   ) {
@@ -28,7 +32,12 @@ export class AddChannelMembersTransaction extends BaseTransaction<
         { userIds, namespaceId },
         manager,
       ),
-      this.channelStatusesService.createStatuses(channelId, userIds, manager),
+      this.channelStatusesService.createStatuses(
+        channelId,
+        { userIds, namespaceId },
+        manager,
+      ),
+      this.channelsService.incrementMembersCount(channelId),
     ]);
   }
 }

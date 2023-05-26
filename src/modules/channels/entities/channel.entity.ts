@@ -29,11 +29,8 @@ export class Channel {
   @Column({ nullable: true })
   description?: string;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @Column()
+  membersCount: number;
 
   @OneToMany(() => ChannelMember, (channelMember) => channelMember.channel)
   @Exclude()
@@ -43,4 +40,10 @@ export class Channel {
   @OneToMany(() => ChannelStatus, (channelStatus) => channelStatus.channel)
   @Exclude()
   statuses: ChannelStatus[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

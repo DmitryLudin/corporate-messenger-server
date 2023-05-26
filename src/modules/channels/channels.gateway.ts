@@ -77,7 +77,7 @@ export class ChannelsGateway
     @ConnectedSocket() client: Socket,
   ) {
     const user = await this.authService.getUserFromSocket(client);
-    const channels = await this.channelsService.getUserChannelIds(
+    const channels = await this.channelsService.findUserChannelIds(
       user.id,
       namespaceId,
     );

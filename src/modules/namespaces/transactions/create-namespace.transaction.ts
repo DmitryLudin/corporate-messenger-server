@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BaseTransaction } from 'src/core/base-transaction';
-import { CreateChannelTransaction } from 'src/modules/channels/transactions/create-channel.transaction';
+import { CreateChannelTransaction } from 'src/modules/channels';
 import { CreateNamespaceWithUserIdDto } from 'src/modules/namespaces/dto/create-namespace.dto';
 import { Namespace } from 'src/modules/namespaces/entities/namespace.entity';
 import { NamespaceMembersService } from 'src/modules/namespaces/services/members.service';

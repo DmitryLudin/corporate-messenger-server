@@ -18,13 +18,21 @@ import { JwtAuthGuard } from 'src/modules/auth/guards';
 import { RequestWithUser } from 'src/modules/auth/types';
 import { ChannelsGateway } from 'src/modules/channels/channels.gateway';
 import { ChannelsService } from 'src/modules/channels/channels.service';
-import { AddChannelMembersDto } from 'src/modules/channels/dto/add-channel-members.dto';
-import { CreateChannelDto } from 'src/modules/channels/dto/create-channel.dto';
-import { RemoveChannelMemberDto } from 'src/modules/channels/dto/remove-channel-member.dto';
-import { UpdateChannelDto } from 'src/modules/channels/dto/update-channel.dto';
-import { NavigationBarChannel } from 'src/modules/channels/models/navigation-bar-channel.model';
-import { ChannelMembersService } from 'src/modules/channels/services/members.service';
-import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
+import {
+  AddChannelMembersDto,
+  CreateChannelDto,
+  RemoveChannelMemberDto,
+  UpdateChannelDto,
+} from 'src/modules/channels/dto';
+import { ChannelModel } from 'src/modules/channels/models';
+import {
+  ChannelMembersService,
+  ChannelMessagesService,
+} from 'src/modules/channels/services';
+import {
+  AddChannelMembersTransaction,
+  CreateChannelTransaction,
+} from 'src/modules/channels/transactions';
 
 @Controller('channels')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -34,15 +42,21 @@ export class ChannelsController {
     private readonly channelMembersService: ChannelMembersService,
     private readonly channelMessagesService: ChannelMessagesService,
     private readonly channelsGateway: ChannelsGateway,
+    private readonly createChannelTransaction: CreateChannelTransaction,
+    private readonly addChannelMembersTransaction: AddChannelMembersTransaction,
   ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get()
   async getAll(
     @Param('namespaceId') namespaceId: string,
+    @Req() { user }: RequestWithUser,
     @Query() options: IPaginationOptions,
   ) {
-    return this.channelsService.findAll(namespaceId, options);
+    return this.channelsService.getChannels(
+      { namespaceId, userId: user.id },
+      options,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -50,8 +64,8 @@ export class ChannelsController {
   async getAllUserChannels(
     @Param('namespaceId') namespaceId: string,
     @Req() { user }: RequestWithUser,
-  ): Promise<NavigationBarChannel[]> {
-    return this.channelsService.findAllUserChannels({
+  ): Promise<ChannelModel[]> {
+    return this.channelsService.getAllUserChannels({
       userId: user.id,
       namespaceId,
     });
@@ -64,7 +78,7 @@ export class ChannelsController {
     @Param('channelName') channelName: string,
     @Req() { user }: RequestWithUser,
   ) {
-    return this.channelsService.findByName(namespaceId, channelName, user.id);
+    return this.channelsService.getByName(namespaceId, channelName, user.id);
   }
 
   @HttpCode(200)
@@ -75,7 +89,7 @@ export class ChannelsController {
     @Req() { user }: RequestWithUser,
     @Body() data: CreateChannelDto,
   ) {
-    const channel = await this.channelsService.create({
+    const channel = await this.createChannelTransaction.run({
       ...data,
       namespaceId,
       userId: user.id,
@@ -96,7 +110,7 @@ export class ChannelsController {
       ...data,
       userId: user.id,
     });
-    this.channelsGateway.emitUpdatedChannel(channel);
+    // this.channelsGateway.emitUpdatedChannel(channel);
     return channel;
   }
 
@@ -120,9 +134,10 @@ export class ChannelsController {
     @Param('channelId') channelId: string,
     @Body() data: AddChannelMembersDto,
   ) {
-    await this.channelMembersService.addMembers(channelId, {
-      ...data,
+    await this.addChannelMembersTransaction.run({
+      channelId,
       namespaceId,
+      ...data,
     });
     return this.channelsGateway.emitChannelMembersCount(channelId);
   }

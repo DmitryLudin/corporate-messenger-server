@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ChannelsModule } from 'src/modules/channels/channels.module';
+import { ChannelsModule } from 'src/modules/channels';
 import { NamespaceMember } from 'src/modules/namespaces/entities/namespace-member.entity';
 import { Namespace } from 'src/modules/namespaces/entities/namespace.entity';
 import { CreateNamespaceTransaction } from 'src/modules/namespaces/transactions/create-namespace.transaction';

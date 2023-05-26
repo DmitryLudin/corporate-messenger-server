@@ -69,7 +69,7 @@ export class NamespacesService {
 
   async join(namespaceName: string, userId: string) {
     const namespace = await this.getByName(namespaceName);
-    const channel = await this.channelsService.getByName({
+    const channel = await this.channelsService.findByName({
       name: 'general',
       namespaceId: namespace.id,
     });

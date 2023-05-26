@@ -14,6 +14,9 @@ export class ChannelStatus {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column()
+  namespaceId: string;
+
   @Column({ default: false, type: 'boolean' })
   isUnread: boolean;
 

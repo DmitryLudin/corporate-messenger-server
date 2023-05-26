@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
-import { AddChannelMembersWithNamespaceDto } from 'src/modules/channels/dto/add-channel-members.dto';
-import { ChannelMember } from 'src/modules/channels/entities/channel-member.entity';
+import { AddChannelMembersWithNamespaceDto } from 'src/modules/channels/dto';
+import { ChannelMember } from 'src/modules/channels/entities';
 import { EntityManager, Repository } from 'typeorm';
 
 @Injectable()
@@ -30,23 +29,6 @@ export class ChannelMembersService {
     return await this.channelMembersRepository.countBy({
       channelId,
     });
-  }
-
-  async findAllChannelMembers(channelId: string, options: IPaginationOptions) {
-    const channelsMembership = await paginate(
-      this.channelMembersRepository,
-      options,
-      {
-        where: { channelId },
-        relations: ['user'],
-        select: ['user'],
-      },
-    );
-
-    return {
-      ...channelsMembership,
-      items: channelsMembership.items.map((membership) => membership.user),
-    };
   }
 
   async removeMember(channelId: string, userId: string) {

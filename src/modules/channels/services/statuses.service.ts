@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ChannelStatus } from 'src/modules/channels/entities/channel-status.entity';
+import { AddChannelMembersWithNamespaceDto } from 'src/modules/channels/dto';
+import { ChannelStatus } from 'src/modules/channels/entities';
 import { EntityManager, Repository } from 'typeorm';
 
 @Injectable()
@@ -12,7 +13,7 @@ export class ChannelStatusesService {
 
   async createStatuses(
     channelId: string,
-    userIds: string[],
+    { userIds, namespaceId }: AddChannelMembersWithNamespaceDto,
     transactionManager?: EntityManager,
   ) {
     const repository = this.getRepository(transactionManager);
@@ -22,6 +23,7 @@ export class ChannelStatusesService {
       return repository.create({
         channelId,
         userId,
+        namespaceId,
         lastReadTimestamp,
         isUnread: true,
       });
