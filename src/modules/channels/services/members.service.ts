@@ -25,14 +25,14 @@ export class ChannelMembersService {
     return await repository.insert(members);
   }
 
-  async getMembersCount(channelId: string) {
-    return await this.channelMembersRepository.countBy({
-      channelId,
-    });
-  }
+  async removeMember(
+    channelId: string,
+    userId: string,
+    transactionManager?: EntityManager,
+  ) {
+    const repository = this.getRepository(transactionManager);
 
-  async removeMember(channelId: string, userId: string) {
-    return await this.channelMembersRepository.delete({ userId, channelId });
+    return await repository.delete({ userId, channelId });
   }
 
   private getRepository(transactionManager?: EntityManager) {

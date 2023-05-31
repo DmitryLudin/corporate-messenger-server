@@ -14,6 +14,10 @@ export class ChannelsService {
     private readonly channelsRepository: Repository<Channel>,
   ) {}
 
+  async findById(id: string): Promise<Channel | null> {
+    return await this.channelsRepository.findOne({ where: { id } });
+  }
+
   async findByName(options: {
     name: string;
     namespaceId: string;
@@ -71,6 +75,28 @@ export class ChannelsService {
     if (!channelRaw) {
       throw new HttpException(
         'Канала с таким именем не существует',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return new ChannelModel(channelRaw);
+  }
+
+  async getById(
+    channelId: string,
+    { namespaceId, userId }: { namespaceId: string; userId: string },
+  ) {
+    const queryBuilder = this.createChannelQueryBuilder(
+      namespaceId,
+      userId,
+    ).andWhere('channel.id = :channelId', { channelId });
+    this.addGroupingForChannelQueryBuilder(queryBuilder);
+
+    const channelRaw = await queryBuilder.getRawOne();
+
+    if (!channelRaw) {
+      throw new HttpException(
+        'Канала с таким ID не существует',
         HttpStatus.NOT_FOUND,
       );
     }

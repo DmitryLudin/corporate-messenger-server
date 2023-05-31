@@ -2,7 +2,6 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
-  Delete,
   Get,
   HttpCode,
   Param,
@@ -32,6 +31,7 @@ import {
 import {
   AddChannelMembersTransaction,
   CreateChannelTransaction,
+  RemoveChannelMemberTransaction,
 } from 'src/modules/channels/transactions';
 
 @Controller('channels')
@@ -44,6 +44,7 @@ export class ChannelsController {
     private readonly channelsGateway: ChannelsGateway,
     private readonly createChannelTransaction: CreateChannelTransaction,
     private readonly addChannelMembersTransaction: AddChannelMembersTransaction,
+    private readonly removeChannelMemberTransaction: RemoveChannelMemberTransaction,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -132,6 +133,7 @@ export class ChannelsController {
   async addNewMembers(
     @Param('namespaceId') namespaceId: string,
     @Param('channelId') channelId: string,
+    @Req() { user }: RequestWithUser,
     @Body() data: AddChannelMembersDto,
   ) {
     await this.addChannelMembersTransaction.run({
@@ -139,18 +141,33 @@ export class ChannelsController {
       namespaceId,
       ...data,
     });
-    return this.channelsGateway.emitChannelMembersCount(channelId);
+    const channel = await this.channelsService.getById(channelId, {
+      namespaceId,
+      userId: user.id,
+    });
+    this.channelsGateway.emitChannelMembersCount(channel);
+    return channel;
   }
 
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  @Delete(':channelId/members/remove')
+  @Post(':channelId/members/remove')
   async removeMember(
+    @Param('namespaceId') namespaceId: string,
     @Param('channelId') channelId: string,
+    @Req() { user }: RequestWithUser,
     @Body() data: RemoveChannelMemberDto,
   ) {
-    await this.channelMembersService.removeMember(channelId, data.userId);
-    return this.channelsGateway.emitChannelMembersCount(channelId);
+    await this.removeChannelMemberTransaction.run({
+      channelId,
+      ...data,
+    });
+    const channel = await this.channelsService.getById(channelId, {
+      namespaceId,
+      userId: user.id,
+    });
+    this.channelsGateway.emitChannelMembersCount(channel);
+    return channel;
   }
 
   @UseGuards(JwtAuthGuard)

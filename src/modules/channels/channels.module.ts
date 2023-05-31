@@ -8,6 +8,7 @@ import { ChannelStatus } from 'src/modules/channels/entities/channel-status.enti
 import { ChannelMembersService } from 'src/modules/channels/services/members.service';
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
 import { ChannelStatusesService } from 'src/modules/channels/services/statuses.service';
+import { RemoveChannelMemberTransaction } from 'src/modules/channels/transactions';
 import { AddChannelMembersTransaction } from 'src/modules/channels/transactions/add-members.transaction';
 import { CreateChannelTransaction } from 'src/modules/channels/transactions/create-channel.transaction';
 import { ChannelsService } from './channels.service';
@@ -26,6 +27,7 @@ import { ChannelsGateway } from './channels.gateway';
   ],
   providers: [
     AddChannelMembersTransaction,
+    RemoveChannelMemberTransaction,
     CreateChannelTransaction,
     ChannelStatusesService,
     ChannelMembersService,

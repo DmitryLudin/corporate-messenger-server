@@ -60,13 +60,10 @@ export class ChannelsGateway
     });
   }
 
-  async emitChannelMembersCount(channelId: string) {
-    const membersCount = await this.channelMembersService.getMembersCount(
-      channelId,
-    );
-    this.server.to(channelId).emit(ChannelsEventEnum.MEMBERS_COUNT, {
-      channelId,
-      membersCount,
+  emitChannelMembersCount(channel: Channel) {
+    this.server.to(channel.id).emit(ChannelsEventEnum.MEMBERS_COUNT, {
+      channelId: channel.id,
+      membersCount: channel.membersCount,
     });
   }
 

@@ -32,6 +32,15 @@ export class ChannelStatusesService {
     return repository.insert(statuses);
   }
 
+  async removeStatus(
+    channelId: string,
+    userId: string,
+    transactionManager?: EntityManager,
+  ) {
+    const repository = this.getRepository(transactionManager);
+    return repository.delete({ userId, channelId });
+  }
+
   private getRepository(transactionManager?: EntityManager) {
     return transactionManager
       ? transactionManager.getRepository(ChannelStatus)

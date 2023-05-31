@@ -7,9 +7,11 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  Unique,
 } from 'typeorm';
 
 @Entity()
+@Unique(['channelId', 'userId'])
 export class ChannelMember {
   @PrimaryGeneratedColumn('uuid')
   id: number;

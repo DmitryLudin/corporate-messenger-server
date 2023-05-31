@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/modules/auth/guards';
 import { RequestWithUser } from 'src/modules/auth/types';
+import { ChannelsService } from 'src/modules/channels';
 import { ChannelsGateway } from 'src/modules/channels/channels.gateway';
 import { JoinNamespaceDto } from 'src/modules/namespaces/dto/join-namespace.dto';
 import { CreateNamespaceDto } from './dto/create-namespace.dto';
@@ -22,6 +23,7 @@ export class NamespacesController {
   constructor(
     private readonly namespacesService: NamespacesService,
     private readonly channelsGateway: ChannelsGateway,
+    private readonly channelsService: ChannelsService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -58,7 +60,11 @@ export class NamespacesController {
       data.namespaceName,
       user.id,
     );
-    await this.channelsGateway.emitChannelMembersCount(channel.id);
+    const channelModel = await this.channelsService.getById(channel.id, {
+      namespaceId: namespace.id,
+      userId: user.id,
+    });
+    await this.channelsGateway.emitChannelMembersCount(channelModel);
     return namespace;
   }
 }
