@@ -37,7 +37,7 @@ export class AddChannelMembersTransaction extends BaseTransaction<
         { userIds, namespaceId },
         manager,
       ),
-      this.channelsService.incrementMembersCount(channelId),
+      this.channelsService.incrementMembersCount(channelId, manager),
     ]);
   }
 }

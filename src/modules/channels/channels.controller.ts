@@ -107,7 +107,7 @@ export class ChannelsController {
     @Body() data: UpdateChannelDto,
     @Req() { user }: RequestWithUser,
   ) {
-    const channel = await this.channelsService.update(id, {
+    const channel = await this.channelsService.updateChannel(id, {
       ...data,
       userId: user.id,
     });

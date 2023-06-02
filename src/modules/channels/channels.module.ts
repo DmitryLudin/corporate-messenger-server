@@ -5,6 +5,7 @@ import { ChannelMember } from 'src/modules/channels/entities/channel-member.enti
 import { ChannelMessage } from 'src/modules/channels/entities/channel-message.entity';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
 import { ChannelStatus } from 'src/modules/channels/entities/channel-status.entity';
+import { ChannelsRepository } from 'src/modules/channels/repositories/channels.repository';
 import { ChannelMembersService } from 'src/modules/channels/services/members.service';
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
 import { ChannelStatusesService } from 'src/modules/channels/services/statuses.service';
@@ -26,6 +27,7 @@ import { ChannelsGateway } from './channels.gateway';
     AuthModule,
   ],
   providers: [
+    ChannelsRepository,
     AddChannelMembersTransaction,
     RemoveChannelMemberTransaction,
     CreateChannelTransaction,

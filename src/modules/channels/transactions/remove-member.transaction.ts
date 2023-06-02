@@ -29,7 +29,7 @@ export class RemoveChannelMemberTransaction extends BaseTransaction<
     await Promise.all([
       this.channelMembersService.removeMember(channelId, userId, manager),
       this.channelStatusesService.removeStatus(channelId, userId, manager),
-      this.channelsService.decrementMembersCount(channelId),
+      this.channelsService.decrementMembersCount(channelId, manager),
     ]);
   }
 }
