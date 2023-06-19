@@ -30,7 +30,7 @@ export class CreateChannelTransaction extends BaseTransaction<
     const channel = await manager.save(
       manager.create<Channel>(Channel, {
         ...others,
-        membersCount: userIds.length,
+        membersCount: 0,
       }),
     );
 

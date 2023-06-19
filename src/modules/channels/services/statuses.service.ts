@@ -41,6 +41,14 @@ export class ChannelStatusesService {
     return repository.delete({ userId, channelId });
   }
 
+  async update(
+    channelId: string,
+    userId: string,
+    data: Partial<ChannelStatus>,
+  ) {
+    return this.channelStatusesRepository.update({ channelId, userId }, data);
+  }
+
   private getRepository(transactionManager?: EntityManager) {
     return transactionManager
       ? transactionManager.getRepository(ChannelStatus)

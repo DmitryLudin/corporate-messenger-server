@@ -11,6 +11,10 @@ export class ChannelMembersService {
     private channelMembersRepository: Repository<ChannelMember>,
   ) {}
 
+  async getChannelMembers(channelId: string): Promise<ChannelMember[]> {
+    return this.channelMembersRepository.find({ where: { channelId } });
+  }
+
   async addMembers(
     channelId: string,
     { userIds, namespaceId }: AddChannelMembersWithNamespaceDto,

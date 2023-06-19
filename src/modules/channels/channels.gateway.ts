@@ -21,6 +21,7 @@ import { UnreadChannelTimestampDto } from 'src/modules/channels/dto/unread-times
 import { UpdateChannelMessageDto } from 'src/modules/channels/dto/update-message.dto';
 import { ChannelMessage } from 'src/modules/channels/entities/channel-message.entity';
 import { Channel } from 'src/modules/channels/entities/channel.entity';
+import { ChannelStatusesService } from 'src/modules/channels/services';
 import { ChannelMembersService } from 'src/modules/channels/services/members.service';
 import { ChannelMessagesService } from 'src/modules/channels/services/messages.service';
 
@@ -35,6 +36,7 @@ export class ChannelsGateway
     private readonly channelsService: ChannelsService,
     private readonly channelMessagesService: ChannelMessagesService,
     private readonly channelMembersService: ChannelMembersService,
+    private readonly channelStatusesService: ChannelStatusesService,
     private readonly authService: AuthService,
   ) {}
 
@@ -82,24 +84,35 @@ export class ChannelsGateway
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
-  @SubscribeMessage(ChannelsEventEnum.MESSAGE)
+  @SubscribeMessage(ChannelsEventEnum.SEND_MESSAGE)
   async handleMessageEvent(
     @MessageBody() data: CreateChannelMessageDto,
     @ConnectedSocket() client: Socket,
-  ) {
+  ): Promise<WsResponse<ChannelMessage>> {
     const message = await this.channelMessagesService.create(data);
 
-    client.to(data.channelId).emit(ChannelsEventEnum.MESSAGE, message);
+    client.to(data.channelId).emit(ChannelsEventEnum.NEW_MESSAGE, message);
 
-    // const memberships =
-    //   await this.channelMembersService.findAllChannelMembership(data.channelId);
-    //
-    // memberships.forEach(({ user }) => {
-    //   // this.unreadChannelsService.markAsUnread(user.id, data.channelId);
-    //   client.to(user.id).emit(ChannelsEventEnum.UNREAD, {
-    //     channelId: data.channelId,
-    //   });
-    // });
+    const channelMembers = await this.channelMembersService.getChannelMembers(
+      data.channelId,
+    );
+
+    channelMembers.forEach((member) => {
+      this.channelStatusesService.update(data.channelId, member.userId, {
+        isUnread: true,
+        lastReadTimestamp: message.createdAt.getTime(),
+      });
+      client.to(data.channelId).emit(ChannelsEventEnum.UNREAD, {
+        channelId: data.channelId,
+        lastReadTimestamp: message.createdAt.getTime(),
+        isUnread: true,
+      });
+    });
+
+    return {
+      event: ChannelsEventEnum.NEW_MESSAGE,
+      data: message,
+    };
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
@@ -138,7 +151,10 @@ export class ChannelsGateway
   async handleUpdateChannelTimestampEvent(
     @MessageBody() data: UnreadChannelTimestampDto,
   ) {
-    // return this.unreadChannelsService.markAsRead(data);
+    await this.channelStatusesService.update(data.channelId, data.userId, {
+      isUnread: false,
+      lastReadTimestamp: data.timestamp,
+    });
   }
 
   private deserializeData<T extends object>(data: T): T {

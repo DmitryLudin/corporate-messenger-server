@@ -6,7 +6,8 @@ export enum ChannelsEventEnum {
   MEMBERS_COUNT = 'channel_members_count',
   UNREAD = 'unread_channel',
   UNREAD_TIMESTAMP = 'unread_channel_timestamp',
-  MESSAGE = 'channel_message',
+  SEND_MESSAGE = 'send_channel_message',
+  NEW_MESSAGE = 'new_channel_message',
   MESSAGE_UPDATED = 'channel_message_updated',
   MESSAGE_REMOVED = 'channel_message_removed',
 }

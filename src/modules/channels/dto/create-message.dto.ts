@@ -10,4 +10,7 @@ export class CreateChannelMessageDto {
 
   @IsString()
   userId: string;
+
+  @IsString()
+  namespaceId: string;
 }
