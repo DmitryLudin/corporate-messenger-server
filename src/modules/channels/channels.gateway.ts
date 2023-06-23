@@ -116,7 +116,7 @@ export class ChannelsGateway
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
-  @SubscribeMessage(ChannelsEventEnum.MESSAGE_UPDATED)
+  @SubscribeMessage(ChannelsEventEnum.UPDATE_MESSAGE)
   async handleUpdateMessage(
     @MessageBody() data: UpdateChannelMessageDto,
     @ConnectedSocket() client: Socket,
@@ -133,16 +133,17 @@ export class ChannelsGateway
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
-  @SubscribeMessage(ChannelsEventEnum.MESSAGE_REMOVED)
+  @SubscribeMessage(ChannelsEventEnum.REMOVE_MESSAGE)
   async handleRemoveMessage(
     @MessageBody() data: RemoveChannelMessageDto,
     @ConnectedSocket() client: Socket,
   ) {
     await this.channelMessagesService.remove(data);
 
-    client.to(data.channelId).emit(ChannelsEventEnum.MESSAGE_REMOVED);
+    client.to(data.channelId).emit(ChannelsEventEnum.MESSAGE_REMOVED, data);
     return {
       event: ChannelsEventEnum.MESSAGE_REMOVED,
+      data,
     };
   }
 

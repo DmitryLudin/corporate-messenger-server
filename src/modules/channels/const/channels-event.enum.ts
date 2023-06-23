@@ -8,6 +8,8 @@ export enum ChannelsEventEnum {
   UNREAD_TIMESTAMP = 'unread_channel_timestamp',
   SEND_MESSAGE = 'send_channel_message',
   NEW_MESSAGE = 'new_channel_message',
+  UPDATE_MESSAGE = 'channel_update_message',
   MESSAGE_UPDATED = 'channel_message_updated',
+  REMOVE_MESSAGE = 'channel_remove_message',
   MESSAGE_REMOVED = 'channel_message_removed',
 }

@@ -1,5 +1,21 @@
 version: "3"
 services:
+#  main:
+#    container_name: server
+#    build:
+#      context: .
+#    volumes:
+#      - .:/usr/src/app
+#      - /usr/src/app/node_modules
+#    env_file:
+#      - .env
+#    ports:
+#      - "${PORT}:${PORT}"
+#      - "9229:9229"
+#    depends_on:
+#      - redis
+#      - postgres
+
   redis:
     container_name: redis
     image: redis:alpine

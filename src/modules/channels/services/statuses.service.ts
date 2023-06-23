@@ -25,7 +25,7 @@ export class ChannelStatusesService {
         userId,
         namespaceId,
         lastReadTimestamp,
-        isUnread: true,
+        isUnread: false,
       });
     });
 
