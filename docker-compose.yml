@@ -1,36 +1,29 @@
 version: "3"
 services:
-#  main:
-#    container_name: server
-#    build:
-#      context: .
-#    volumes:
-#      - .:/usr/src/app
-#      - /usr/src/app/node_modules
-#    env_file:
-#      - .env
-#    ports:
-#      - "${PORT}:${PORT}"
-#      - "9229:9229"
-#    depends_on:
-#      - redis
-#      - postgres
+  server:
+    container_name: server
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - mynetwork
 
   redis:
     container_name: redis
     image: redis:alpine
+    restart: always
     ports:
       - 6379:6379
-
-  redis-commander:
-    container_name: redis-commander
-    image: ghcr.io/joeferner/redis-commander:latest
-    environment:
-      - REDIS_HOSTS=local:redis:6379
-    ports:
-      - "8081:8081"
-    depends_on:
-      - redis
+    networks:
+      - mynetwork
 
   postgres:
     container_name: postgres
@@ -42,19 +35,39 @@ services:
       - postgres:/data/postgres
     env_file:
       - docker.env
+    networks:
+      - mynetwork
 
-  pgadmin:
-    links:
-      - postgres:postgres
-    container_name: pgadmin
+  client:
+    container_name: client
     restart: always
-    image: dpage/pgadmin4
     ports:
-      - "8080:80"
+      - "8080:8080"
+    build:
+      context: ../corporate-messenger-web-client
+      dockerfile: Dockerfile
+    depends_on:
+      - server
+    networks:
+      - mynetwork
+
+  gateway:
+    container_name: gateway
+    image: nginx:latest
+    restart: always
     volumes:
-      - pgadmin:/var/lib/pgadmin
-    env_file:
-      - docker.env
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - client
+      - server
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
 
 volumes:
   postgres:

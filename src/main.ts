@@ -40,7 +40,10 @@ async function bootstrap() {
   });
   app.useWebSocketAdapter(redisIoAdapter);
 
-  await app.listen(configService.get('PORT') || 3000);
+  await app.listen(
+    configService.get('PORT') || 3000,
+    configService.get('HOST'),
+  );
 }
 
 bootstrap();

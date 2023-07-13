@@ -1,18 +1,15 @@
-FROM node:19 AS base
-
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+FROM node:18
 
 WORKDIR /usr/src/app
 
-COPY package.json package-lock.json ./
+COPY package*.json ./
 
-RUN npm install --frozen-lockfile --production
-
-RUN npm run build
+RUN npm ci
 
 COPY . .
 
-COPY ./dist ./dist
+RUN npm run build
 
-CMD ["node", "dist/main"]
+USER node
+
+CMD ["npm", "run", "start:prod"]
